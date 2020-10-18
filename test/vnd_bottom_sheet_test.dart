@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
+import 'package:flutter_vnd_keyboard/src/vnd_editing_controller.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 
 void main() async {
@@ -49,5 +50,21 @@ void main() async {
       ],
       finder: find.byType(VndKeyboard),
     );
+  });
+
+  testGoldens('accepts existing value', (tester) async {
+    await tester.pumpWidgetBuilder(VndBottomSheet(
+      controller: VndEditingController(vnd: 10000),
+    ));
+
+    await screenMatchesGolden(tester, 'vnd_bottom_sheet/existing_value');
+  });
+
+  testGoldens('includes auto zeros', (tester) async {
+    await tester.pumpWidgetBuilder(VndBottomSheet(
+      controller: VndEditingController.fromValue(VndEditingValue(rawValue: 10)),
+    ));
+
+    await screenMatchesGolden(tester, 'vnd_bottom_sheet/auto_zeros');
   });
 }
