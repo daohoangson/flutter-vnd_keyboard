@@ -66,7 +66,7 @@ class _VndKeyboardState extends State<VndKeyboard> {
               ],
               flex: 3,
             ),
-            _Divider.vertical().marginTop.marginBottom,
+            _Divider.vertical().marginTop,
             _buildExpandedColumn(
               [
                 Expanded(
@@ -76,7 +76,6 @@ class _VndKeyboardState extends State<VndKeyboard> {
                     value: KeyboardKey.delete(),
                   ),
                 ),
-                _Divider.horizontal().marginRight,
                 Expanded(
                   child: _Key(
                     child: Icon(

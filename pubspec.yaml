@@ -18,3 +18,7 @@ dev_dependencies:
   golden_toolkit: ^0.6.0
 
 flutter:
+  assets:
+    # needed to trigger the FontManifest.json to be included
+    - images/
+  uses-material-design: true

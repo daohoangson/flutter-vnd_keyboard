@@ -12,9 +12,5 @@ dependencies:
   flutter_vnd_keyboard:
     path: ..
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-
 flutter:
   uses-material-design: true

@@ -175,17 +175,14 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
   AnimationController controller;
 
   @override
-  Widget build(BuildContext context) {
-    // print('animation.value=${animation.value}');
-    return Opacity(
-      child: Container(
-        color: Theme.of(context).cursorColor,
-        height: DefaultTextStyle.of(context).style.fontSize * 3,
-        width: 2,
-      ),
-      opacity: animation.value,
-    );
-  }
+  Widget build(BuildContext context) => Opacity(
+        child: Container(
+          color: Theme.of(context).cursorColor,
+          height: DefaultTextStyle.of(context).style.fontSize * 3,
+          width: 2,
+        ),
+        opacity: animation.value,
+      );
 
   void dispose() {
     controller.dispose();
@@ -199,8 +196,11 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
-    animation = Tween<double>(begin: 0, end: 1).animate(controller)
+    animation = Tween<double>(begin: 1, end: 0).animate(controller)
       ..addListener(() => setState(() {}));
-    controller.repeat(reverse: true);
+
+    if (!EditableText.debugDeterministicCursor) {
+      controller.repeat(reverse: true);
+    }
   }
 }
