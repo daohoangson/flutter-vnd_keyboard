@@ -1,0 +1,38 @@
+name: Flutter
+on:
+  push:
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v1
+      - name: Run flutter format
+        run: flutter format --dry-run --set-exit-if-changed .
+      - run: flutter analyze
+
+  unit_test:
+    name: Unit test
+    strategy:
+      matrix:
+        channel: [dev, beta, stable]
+    continue-on-error: ${{ matrix.channel != 'stable' }}
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          channel: ${{ matrix.channel }}
+      - name: Run flutter test
+        run: |
+          if [ "${{ matrix.channel }}" == "stable" ]; then
+            flutter test --coverage
+            bash <(curl -s https://codecov.io/bash)
+          else
+            flutter test
+          fi
