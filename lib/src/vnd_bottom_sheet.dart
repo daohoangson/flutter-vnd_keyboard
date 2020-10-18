@@ -184,11 +184,13 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
         opacity: animation.value,
       );
 
+  @override
   void dispose() {
     controller.dispose();
     super.dispose();
   }
 
+  @override
   void initState() {
     super.initState();
 

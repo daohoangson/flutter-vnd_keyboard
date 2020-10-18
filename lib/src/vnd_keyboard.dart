@@ -196,15 +196,14 @@ class _Key extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget built = InkWell(
       child: Center(
-        child: child != null
-            ? child
-            : Text(
-                value.toString(),
-                style: Theme.of(context)
-                    .textTheme
-                    .button
-                    .copyWith(fontSize: buttonLabelSize),
-              ),
+        child: child ??
+            Text(
+              value.toString(),
+              style: Theme.of(context)
+                  .textTheme
+                  .button
+                  .copyWith(fontSize: buttonLabelSize),
+            ),
       ),
       onTap: () => onTap?.call(value),
     );
