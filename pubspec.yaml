@@ -1,8 +1,8 @@
 name: flutter_vnd_keyboard
-description: A new Flutter package project.
+description: Vietnamese đồng keyboard for Flutter.
 version: 0.0.1
-author:
-homepage:
+author: Dao Hoang Son <pub.dev@daohoangson.com>
+homepage: https://github.com/daohoangson/flutter-vnd_keyboard
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
