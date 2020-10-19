@@ -6,12 +6,16 @@ class VndKeyboard extends StatefulWidget {
   final double buttonLabelSize;
   final double height;
   final ValueChanged<KeyboardKey> onTap;
+  final String semanticLabelDelete;
+  final String semanticLabelDone;
 
   const VndKeyboard({
     this.buttonLabelSize = 20,
     this.height = 200,
     Key key,
     this.onTap,
+    this.semanticLabelDelete,
+    this.semanticLabelDone,
   }) : super(key: key);
 
   @override
@@ -27,39 +31,39 @@ class _VndKeyboardState extends State<VndKeyboard> {
               [
                 _buildExpandedRow(
                   [
-                    _buildKey('1'),
+                    _buildKey(const KeyboardKey.numeric(1)),
                     _Divider.vertical().marginTop,
-                    _buildKey('2'),
+                    _buildKey(const KeyboardKey.numeric(2)),
                     _Divider.vertical().marginTop,
-                    _buildKey('3'),
+                    _buildKey(const KeyboardKey.numeric(3)),
                   ],
                 ),
                 _Divider.horizontal().marginLeft,
                 _buildExpandedRow(
                   [
-                    _buildKey('4'),
+                    _buildKey(const KeyboardKey.numeric(4)),
                     _Divider.vertical(),
-                    _buildKey('5'),
+                    _buildKey(const KeyboardKey.numeric(5)),
                     _Divider.vertical(),
-                    _buildKey('6'),
+                    _buildKey(const KeyboardKey.numeric(6)),
                   ],
                 ),
                 _Divider.horizontal().marginLeft,
                 _buildExpandedRow(
                   [
-                    _buildKey('7'),
+                    _buildKey(const KeyboardKey.numeric(7)),
                     _Divider.vertical(),
-                    _buildKey('8'),
+                    _buildKey(const KeyboardKey.numeric(8)),
                     _Divider.vertical(),
-                    _buildKey('9'),
+                    _buildKey(const KeyboardKey.numeric(9)),
                   ],
                 ),
                 _Divider.horizontal().marginLeft,
                 _buildExpandedRow(
                   [
-                    _buildKey('0'),
+                    _buildKey(const KeyboardKey.numeric(0)),
                     _Divider.vertical().marginBottom,
-                    _buildKey('000', flex: 2),
+                    _buildKey(KeyboardKey.zeros, flex: 2),
                     _Divider.vertical().invisible,
                   ],
                 ),
@@ -69,22 +73,22 @@ class _VndKeyboardState extends State<VndKeyboard> {
             _Divider.vertical().marginTop,
             _buildExpandedColumn(
               [
-                Expanded(
-                  child: _Key(
-                    child: Icon(Icons.backspace),
-                    onTap: widget.onTap,
-                    value: KeyboardKey.delete(),
+                _buildKey(
+                  KeyboardKey.delete,
+                  child: Icon(
+                    Icons.backspace,
+                    // https://www.fileformat.info/info/unicode/char/007f/index.htm
+                    semanticLabel:
+                        widget.semanticLabelDelete ?? String.fromCharCode(127),
                   ),
                 ),
-                Expanded(
-                  child: _Key(
-                    child: Icon(
-                      Icons.done,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                    backgroundColor: Theme.of(context).primaryColor,
-                    onTap: widget.onTap,
-                    value: KeyboardKey.done(),
+                _buildKey(
+                  KeyboardKey.done,
+                  backgroundColor: Theme.of(context).primaryColor,
+                  child: Icon(
+                    Icons.done,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    semanticLabel: widget.semanticLabelDone ?? 'OK',
                   ),
                 ),
               ],
@@ -115,14 +119,18 @@ class _VndKeyboardState extends State<VndKeyboard> {
       Expanded(child: Row(children: children), flex: flex);
 
   Widget _buildKey(
-    String value, {
+    KeyboardKey key, {
+    Color backgroundColor,
+    Widget child,
     int flex = 1,
   }) =>
       Expanded(
         child: _Key(
+          backgroundColor: backgroundColor,
           buttonLabelSize: widget.buttonLabelSize,
+          child: child,
           onTap: widget.onTap,
-          value: KeyboardKey.numeric(value),
+          value: key,
         ),
         flex: flex,
       );

@@ -2,23 +2,24 @@ class KeyboardKey {
   final KeyboardKeyType type;
   final String value;
 
-  KeyboardKey.delete()
-      : type = KeyboardKeyType.delete,
-        value = null;
+  const KeyboardKey._(this.type, [this.value]);
 
-  KeyboardKey.done()
-      : type = KeyboardKeyType.done,
-        value = null;
+  static const delete = KeyboardKey._(KeyboardKeyType.delete);
 
-  KeyboardKey.numeric(this.value) : type = KeyboardKeyType.numeric;
+  static const done = KeyboardKey._(KeyboardKeyType.done);
+
+  const KeyboardKey.numeric(int value)
+      : type = KeyboardKeyType.value,
+        value = '$value';
+
+  static const zeros = KeyboardKey._(KeyboardKeyType.value, '000');
 
   @override
-  String toString() =>
-      type == KeyboardKeyType.numeric ? value : type.toString();
+  String toString() => type == KeyboardKeyType.value ? value : type.toString();
 }
 
 enum KeyboardKeyType {
   delete,
   done,
-  numeric,
+  value,
 }

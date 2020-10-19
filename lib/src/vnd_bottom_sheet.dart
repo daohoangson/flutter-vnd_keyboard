@@ -54,7 +54,7 @@ class _VndBottomSheetState extends State<VndBottomSheet> {
       case KeyboardKeyType.done:
         Navigator.pop(context, controller.vnd);
         break;
-      case KeyboardKeyType.numeric:
+      case KeyboardKeyType.value:
         controller.append(key.value);
         break;
     }
