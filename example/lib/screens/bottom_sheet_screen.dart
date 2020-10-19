@@ -17,11 +17,13 @@ class _Button extends StatelessWidget {
   Widget build(BuildContext context) => RaisedButton(
         child: Text('showBottomSheet'),
         onPressed: () async {
-          final value = await showModalBottomSheet(
+          final vnd = await showModalBottomSheet(
             builder: (_) => VndBottomSheet(),
             context: context,
           );
-          print('value=$value');
+          Scaffold.of(context).showSnackBar(SnackBar(
+            content: Text('vnd=$vnd'),
+          ));
         },
       );
 }

@@ -4,15 +4,15 @@ import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 
 class KeyboardScreen extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext _) => Scaffold(
         appBar: AppBar(title: Text('Keyboard')),
-        body: Column(
-          children: [
-            Expanded(child: Container()),
-            VndKeyboard(
-              onTap: (value) => print('onTap($value)'),
-            ),
-          ],
+        bottomNavigationBar: Builder(
+          builder: (context) => VndKeyboard(
+            onTap: (value) => Scaffold.of(context).showSnackBar(SnackBar(
+              content: Text('onTap($value)'),
+              duration: const Duration(milliseconds: 10),
+            )),
+          ),
         ),
       );
 }
