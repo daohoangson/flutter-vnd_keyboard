@@ -158,9 +158,6 @@ class _Divider extends StatelessWidget {
   _Divider get marginLeft =>
       copyWith(margin: const EdgeInsets.only(left: _Divider.kPadding));
 
-  _Divider get marginRight =>
-      copyWith(margin: const EdgeInsets.only(right: _Divider.kPadding));
-
   _Divider get marginTop =>
       copyWith(margin: const EdgeInsets.only(top: _Divider.kPadding));
 

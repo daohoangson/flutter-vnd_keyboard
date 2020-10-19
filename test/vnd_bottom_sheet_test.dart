@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
-import 'package:flutter_vnd_keyboard/src/vnd_editing_controller.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 
 void main() async {
-  EditableText.debugDeterministicCursor = true;
+  bool debugDeterministicCursor;
+
+  setUp(() {
+    debugDeterministicCursor = EditableText.debugDeterministicCursor;
+    EditableText.debugDeterministicCursor = true;
+  });
+
+  tearDown(() {
+    EditableText.debugDeterministicCursor = debugDeterministicCursor;
+  });
 
   testGoldens('looks correct', (tester) async {
     final widget = Column(
@@ -50,22 +58,6 @@ void main() async {
       ],
       finder: find.byType(VndKeyboard),
     );
-  });
-
-  testGoldens('accepts existing value', (tester) async {
-    await tester.pumpWidgetBuilder(VndBottomSheet(
-      controller: VndEditingController(vnd: 10000),
-    ));
-
-    await screenMatchesGolden(tester, 'vnd_bottom_sheet/existing_value');
-  });
-
-  testGoldens('includes auto zeros', (tester) async {
-    await tester.pumpWidgetBuilder(VndBottomSheet(
-      controller: VndEditingController.fromValue(VndEditingValue(rawValue: 10)),
-    ));
-
-    await screenMatchesGolden(tester, 'vnd_bottom_sheet/auto_zeros');
   });
 
   testWidgets('handles taps', (tester) async {
@@ -124,38 +116,5 @@ void main() async {
     await tester.tap(find.bySemanticsLabel('OK'));
     await tester.pumpAndSettle();
     expect(result, equals(12345678900));
-  });
-
-  testWidgets('disables autoZeros', (tester) async {
-    final controller = VndEditingController.fromValue(
-        VndEditingValue(autoZeros: true, rawValue: 100));
-    await tester.pumpWidget(
-        materialAppWrapper()(VndBottomSheet(controller: controller)));
-
-    expect(controller.autoZeros, isTrue);
-    expect(controller.vnd, equals(100000));
-
-    expect(find.text('100'), findsOneWidget);
-    expect(find.text(',000'), findsOneWidget);
-
-    await tester.drag(find.text(',000'), Offset(0, -100));
-    await tester.pumpAndSettle();
-
-    expect(controller.autoZeros, isFalse);
-    expect(controller.vnd, equals(100));
-  });
-
-  testWidgets('toggles isSelected', (tester) async {
-    final controller = VndEditingController(vnd: 100000);
-    await tester.pumpWidget(
-        materialAppWrapper()(VndBottomSheet(controller: controller)));
-
-    expect(controller.isSelected, isFalse);
-
-    await tester.tap(find.text('100,000'));
-    expect(controller.isSelected, isTrue);
-
-    await tester.tap(find.text('100,000'));
-    expect(controller.isSelected, isFalse);
   });
 }
