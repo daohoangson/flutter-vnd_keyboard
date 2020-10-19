@@ -105,6 +105,7 @@ void main() {
       final controller = VndEditingController(vnd: 123);
       controller.isSelected = true;
       controller.append('456');
+      expect(controller.isSelected, isFalse);
       expect(controller.vnd, equals(456));
     });
 

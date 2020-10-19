@@ -31,7 +31,10 @@ class VndEditingController extends ValueNotifier<VndEditingValue> {
   /// Appends new characters at the end of the current value.
   void append(String str) {
     if (isSelected) {
-      value = value.copyWith(rawValue: int.tryParse(str) ?? 0);
+      value = value.copyWith(
+        isSelected: false,
+        rawValue: int.tryParse(str) ?? 0,
+      );
       return;
     }
 
