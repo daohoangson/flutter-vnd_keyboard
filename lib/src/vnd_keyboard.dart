@@ -2,17 +2,36 @@ import 'package:flutter/material.dart';
 
 import 'keyboard_key.dart';
 
+/// A Vietnamese đồng keyboard.
 class VndKeyboard extends StatefulWidget {
-  final double buttonLabelSize;
+  /// The entire keyboard height.
+  ///
+  /// Default: `200`.
   final double height;
+
+  /// The font size of key labels.
+  ///
+  /// Default: `20`.
+  final double labelSize;
+
+  /// Called when the user taps a key.
   final ValueChanged<KeyboardKey> onTap;
+
+  /// Semantic label for the Delete key.
+  ///
+  /// Default: ASCII 127 (delete)
   final String semanticLabelDelete;
+
+  /// Semantic label for the Done key.
+  ///
+  /// Default: `'OK'`.
   final String semanticLabelDone;
 
+  /// Creates a VND keyboard.
   const VndKeyboard({
-    this.buttonLabelSize = 20,
     this.height = 200,
     Key key,
+    this.labelSize = 20,
     this.onTap,
     this.semanticLabelDelete,
     this.semanticLabelDone,
@@ -127,8 +146,8 @@ class _VndKeyboardState extends State<VndKeyboard> {
       Expanded(
         child: _Key(
           backgroundColor: backgroundColor,
-          buttonLabelSize: widget.buttonLabelSize,
           child: child,
+          labelSize: widget.labelSize,
           onTap: widget.onTap,
           value: key,
         ),
@@ -183,16 +202,16 @@ extension _Invisible on Widget {
 
 class _Key extends StatelessWidget {
   final Color backgroundColor;
-  final double buttonLabelSize;
   final Widget child;
+  final double labelSize;
   final ValueChanged<KeyboardKey> onTap;
   final KeyboardKey value;
 
   const _Key({
     this.backgroundColor,
     this.child,
-    this.buttonLabelSize,
     Key key,
+    this.labelSize,
     this.onTap,
     this.value,
   }) : super(key: key);
@@ -207,7 +226,7 @@ class _Key extends StatelessWidget {
               style: Theme.of(context)
                   .textTheme
                   .button
-                  .copyWith(fontSize: buttonLabelSize),
+                  .copyWith(fontSize: labelSize),
             ),
       ),
       onTap: () => onTap?.call(value),

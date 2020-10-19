@@ -1,5 +1,8 @@
 # flutter_vnd_keyboard
 
+![github/workflows](https://github.com/daohoangson/flutter-vnd_keyboard/workflows/Flutter/badge.svg)
+[![codecov](https://codecov.io/gh/daohoangson/flutter-vnd_keyboard/branch/master/graph/badge.svg?token=UCX3ZZ60IU)](https://codecov.io/gh/daohoangson/flutter-vnd_keyboard)
+
 Vietnamese đồng keyboard for Flutter.
 
 ## Getting Started
@@ -25,11 +28,11 @@ And use `VndKeyboard` or `VndBottomSheet` where appropriate.
       RaisedButton(
         child: Text('showBottomSheet'),
         onPressed: () async {
-          final value = await showModalBottomSheet(
+          final vnd = await showModalBottomSheet(
             builder: (_) => VndBottomSheet(),
             context: context,
           );
-          print('value=$value');
+          print('vnd=$vnd');
         },
       );
 }

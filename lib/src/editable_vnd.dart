@@ -2,13 +2,39 @@ import 'package:flutter/material.dart';
 
 import 'vnd_editing_controller.dart';
 
+/// A Vietnamese đồng editable widget.
 class EditableVnd extends StatelessWidget {
+  /// The color for auto zeros.
+  ///
+  /// Default: [ThemeData.dividerColor].
   final Color autoZerosColor;
+
+  /// The controller.
   final VndEditingController controller;
+
+  /// A widget to display the blinking cursor.
+  ///
+  /// If null, this widget will create its own widget.
   final Widget cursor;
+
+  /// The padding.
+  ///
+  /// Default: `16` on all sides.
   final EdgeInsets padding;
+
+  /// The style to use for the text being edited.
+  ///
+  /// Default: [TextTheme.subtitle1].
   final TextStyle style;
+
+  /// A widget to display the đ symbol.
+  ///
+  /// If null, this widget will create its own widget.
   final Widget symbol;
+
+  /// The color for selection background.
+  ///
+  /// Default: [ThemeData.textSelectionColor].
   final Color textSelectionColor;
 
   const EditableVnd(
@@ -24,8 +50,9 @@ class EditableVnd extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cursor = this.cursor ?? const _BlinkingCursor();
-    final style = this.style ?? Theme.of(context).textTheme.headline4;
+    final theme = Theme.of(context);
+    final style = this.style ?? theme.textTheme.subtitle1;
+    final cursor = this.cursor ?? _BlinkingCursor(style);
     final dismissible = Dismissible(
       child: Text(
         ',000',
@@ -35,7 +62,12 @@ class EditableVnd extends StatelessWidget {
       key: ValueKey(controller),
       onDismissed: _disableAutoZeros,
     );
-    final symbol = this.symbol ?? const _VndSymbol();
+    final symbol = this.symbol ??
+        Text('đ',
+            style: style.copyWith(
+              color: theme.disabledColor,
+              fontSize: style.fontSize * .7,
+            ));
 
     return Padding(
       child: AnimatedBuilder(
@@ -97,7 +129,9 @@ class EditableVnd extends StatelessWidget {
 }
 
 class _BlinkingCursor extends StatefulWidget {
-  const _BlinkingCursor({Key key}) : super(key: key);
+  final TextStyle style;
+
+  _BlinkingCursor(this.style, {Key key}) : super(key: key);
 
   @override
   _BlinkingCursorState createState() => _BlinkingCursorState();
@@ -107,16 +141,23 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
     with SingleTickerProviderStateMixin {
   Animation<double> animation;
   AnimationController controller;
+  double height;
 
   @override
   Widget build(BuildContext context) => Opacity(
         child: Container(
           color: Theme.of(context).cursorColor,
-          height: DefaultTextStyle.of(context).style.fontSize * 3,
+          height: height,
           width: 2,
         ),
         opacity: animation.value,
       );
+
+  @override
+  void didUpdateWidget(covariant _BlinkingCursor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _calculateHeight();
+  }
 
   @override
   void dispose() {
@@ -138,17 +179,15 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
     if (!EditableText.debugDeterministicCursor) {
       controller.repeat(reverse: true);
     }
+
+    _calculateHeight();
   }
-}
 
-class _VndSymbol extends StatelessWidget {
-  const _VndSymbol({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style =
-        theme.textTheme.headline5.copyWith(color: theme.disabledColor);
-    return Text('đ', style: style);
+  void _calculateHeight() {
+    final tp = TextPainter(
+      text: TextSpan(text: '123456', style: widget.style),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    height = tp.height;
   }
 }

@@ -5,10 +5,19 @@ import 'vnd_editing_controller.dart';
 import 'keyboard_key.dart';
 import 'vnd_keyboard.dart';
 
+/// A Vietnamese đồng bottom sheet.
 class VndBottomSheet extends StatefulWidget {
+  /// Controls the value being inputed.
+  ///
+  /// If null, this widget will create its own [VndEditingController].
   final VndEditingController controller;
+
+  /// A widget to display the current value.
+  ///
+  /// If null, this widget will create its own [EditableVnd].
   final Widget editable;
 
+  /// Creates a VND bottom sheet.
   const VndBottomSheet({
     this.controller,
     this.editable,
@@ -24,12 +33,14 @@ class _VndBottomSheetState extends State<VndBottomSheet> {
   VndEditingController get controller =>
       widget.controller ?? (_managedController ??= VndEditingController());
 
-  Widget editable;
-
   @override
   Widget build(BuildContext context) => Column(
         children: [
-          editable,
+          widget.editable ??
+              EditableVnd(
+                controller,
+                style: Theme.of(context).textTheme.headline4,
+              ),
           VndKeyboard(onTap: _onTap),
         ],
         mainAxisSize: MainAxisSize.min,
@@ -39,12 +50,6 @@ class _VndBottomSheetState extends State<VndBottomSheet> {
   void dispose() {
     _managedController?.dispose();
     super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    editable = widget.editable ?? EditableVnd(controller);
   }
 
   void _onTap(KeyboardKey key) {

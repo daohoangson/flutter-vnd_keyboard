@@ -107,6 +107,14 @@ void main() {
       controller.append('456');
       expect(controller.vnd, equals(456));
     });
+
+    test('skips changing value (already empty)', () {
+      final controller = VndEditingController();
+      var triggered = 0;
+      controller.addListener(() => triggered++);
+      controller.delete();
+      expect(triggered, equals(0));
+    });
   });
 
   group('delete', () {
