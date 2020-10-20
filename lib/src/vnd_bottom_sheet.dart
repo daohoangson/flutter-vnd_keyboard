@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'editable_vnd.dart';
@@ -31,6 +33,8 @@ class _VndBottomSheetState extends State<VndBottomSheet> {
       widget.controller ??
       (_managedController ??= VndEditingController(vnd: widget.vnd));
 
+  StreamSubscription _doneSubscription;
+
   @override
   Widget build(BuildContext context) => VndKeyboardProvider(
         child: Padding(
@@ -46,7 +50,7 @@ class _VndBottomSheetState extends State<VndBottomSheet> {
 
   @override
   void dispose() {
-    controller.removeListener(_onControllerChanged);
+    _doneSubscription.cancel();
     _managedController?.dispose();
     super.dispose();
   }
@@ -54,12 +58,7 @@ class _VndBottomSheetState extends State<VndBottomSheet> {
   @override
   void initState() {
     super.initState();
-    controller.addListener(_onControllerChanged);
-  }
-
-  void _onControllerChanged() {
-    if (controller.isDone) {
-      Navigator.pop(context, controller.vnd);
-    }
+    _doneSubscription = controller
+        .onDone((controller) => Navigator.pop(context, controller.vnd));
   }
 }

@@ -25,6 +25,7 @@ void main() async {
 
   group('already focused', () {
     VndEditingController controller;
+    int done;
     FocusNode flutterFn;
     VndFocusNode focusNode;
     GlobalKey key;
@@ -34,6 +35,9 @@ void main() async {
       flutterFn = FocusNode();
       focusNode = VndFocusNode();
       key = GlobalKey();
+
+      done = 0;
+      controller.onDone((_) => done++);
     });
 
     final _precondition = (WidgetTester tester) async {
@@ -95,10 +99,10 @@ void main() async {
       await tester.tap(find.bySemanticsLabel(String.fromCharCode(127)));
       expect(controller.vnd, equals(12345678900));
 
-      expect(controller.isDone, false);
+      expect(done, equals(0));
       await tester.tap(find.bySemanticsLabel('OK'));
       await tester.pumpAndSettle();
-      expect(controller.isDone, true);
+      expect(done, equals(1));
       expect(find.bySemanticsLabel('OK'), findsNothing);
     });
   });

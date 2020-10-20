@@ -130,8 +130,9 @@ class _State extends State<VndKeyboardProvider> {
         controller?.delete();
         break;
       case KeyboardKeyType.done:
-        controller?.done();
+        final outdatedController = controller;
         unfocus();
+        outdatedController?.done();
         break;
       case KeyboardKeyType.value:
         controller?.append(key.value);
