@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vnd_keyboard/screens/bottom_sheet_screen.dart';
+import 'package:vnd_keyboard/screens/keyboard_provider_screen.dart';
 import 'package:vnd_keyboard/screens/keyboard_screen.dart';
 
 void main() => runApp(DemoApp());
@@ -7,6 +8,7 @@ void main() => runApp(DemoApp());
 final _routes = Map<String, Widget Function(BuildContext)>.unmodifiable({
   '/keyboard': (_) => KeyboardScreen(),
   '/bottom-sheet': (_) => BottomSheetScreen(),
+  '/keyboard-provider': (_) => KeyboardProviderScreen(),
 });
 
 final _routeNames = _routes.keys.toList(growable: false);

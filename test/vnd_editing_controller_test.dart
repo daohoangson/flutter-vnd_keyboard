@@ -133,6 +133,16 @@ void main() {
     });
   });
 
+  group('done', () {
+    test('marks as done', () {
+      final controller = VndEditingController();
+
+      expect(controller.isDone, isFalse);
+      controller.done();
+      expect(controller.isDone, isTrue);
+    });
+  });
+
   group('vnd', () {
     group('autoZeros=false', () {
       test('rawValue=1', () {

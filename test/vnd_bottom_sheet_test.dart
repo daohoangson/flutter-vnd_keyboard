@@ -112,9 +112,11 @@ void main() async {
     await tester.tap(find.bySemanticsLabel(String.fromCharCode(127)));
     expect(controller.vnd, equals(12345678900));
 
+    expect(controller.isDone, false);
     expect(result, isNull);
     await tester.tap(find.bySemanticsLabel('OK'));
     await tester.pumpAndSettle();
+    expect(controller.isDone, true);
     expect(result, equals(12345678900));
   });
 }

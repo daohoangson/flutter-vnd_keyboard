@@ -19,6 +19,9 @@ class VndEditingController extends ValueNotifier<VndEditingValue> {
   /// Controls whether auto zeros should be added.
   set autoZeros(bool v) => value = value.copyWith(autoZeros: v);
 
+  /// Returns `true` if Done key has been tapped.
+  bool get isDone => value.isDone;
+
   /// Returns `true` if input is being selected.
   bool get isSelected => value.isSelected;
 
@@ -55,12 +58,18 @@ class VndEditingController extends ValueNotifier<VndEditingValue> {
       value = value.copyWith(rawValue: int.tryParse(deleted) ?? 0);
     }
   }
+
+  /// Marks input as done.
+  void done() => value = value.copyWith(isDone: true);
 }
 
 /// The current state while editing a VND value.
 class VndEditingValue {
   /// Whether auto zeros should be added.
   final bool autoZeros;
+
+  /// Whether Done key has been tapped.
+  final bool isDone;
 
   /// Whether input is being selected.
   final bool isSelected;
@@ -71,6 +80,7 @@ class VndEditingValue {
   /// Creates an editing state.
   const VndEditingValue({
     this.autoZeros = true,
+    this.isDone = false,
     this.isSelected = false,
     this.rawValue = 0,
   });
@@ -85,11 +95,13 @@ class VndEditingValue {
   /// Creates a copy with the given fields replaced with the new values.
   VndEditingValue copyWith({
     bool autoZeros,
+    bool isDone,
     bool isSelected,
     int rawValue,
   }) =>
       VndEditingValue(
         autoZeros: autoZeros ?? this.autoZeros,
+        isDone: isDone ?? this.isDone,
         isSelected: isSelected ?? this.isSelected,
         rawValue: rawValue ?? this.rawValue,
       );
@@ -102,6 +114,7 @@ class VndEditingValue {
     if (identical(other, this)) return true;
     if (other is VndEditingValue) {
       return autoZeros == other.autoZeros &&
+          isDone == other.isDone &&
           isSelected == other.isSelected &&
           rawValue == other.rawValue;
     } else {

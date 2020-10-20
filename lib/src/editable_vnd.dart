@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
 
 import 'vnd_editing_controller.dart';
+import 'vnd_keyboard_provider.dart';
 
 /// A Vietnamese đồng editable widget.
-class EditableVnd extends StatelessWidget {
+class EditableVnd extends StatefulWidget {
   /// The color for auto zeros.
   ///
   /// Default: [ThemeData.dividerColor].
   final Color autoZerosColor;
 
-  /// The controller.
+  /// Whether this text field should focus itself
+  /// if nothing else is already focused.
+  ///
+  /// Default: `false`.
+  final bool autofocus;
+
+  /// Controls the value being inputed.
+  ///
+  /// If null, this widget will create its own [VndEditingController].
+  ///
+  /// [controller] and [vnd] cannot be set at the same time.
   final VndEditingController controller;
 
   /// A widget to display the blinking cursor.
@@ -17,10 +28,10 @@ class EditableVnd extends StatelessWidget {
   /// If null, this widget will create its own widget.
   final Widget cursor;
 
-  /// The padding.
+  /// Defines the keyboard focus for this widget.
   ///
-  /// Default: `16` on all sides.
-  final EdgeInsets padding;
+  /// If null, this widget will create its own [VndFocusNode].
+  final VndFocusNode focusNode;
 
   /// The style to use for the text being edited.
   ///
@@ -37,72 +48,120 @@ class EditableVnd extends StatelessWidget {
   /// Default: [ThemeData.textSelectionColor].
   final Color textSelectionColor;
 
-  const EditableVnd(
-    this.controller, {
+  /// The initial value.
+  ///
+  /// [vnd] and [controller] cannot be set at the same time.
+  final int vnd;
+
+  const EditableVnd({
     this.autoZerosColor,
+    this.autofocus = false,
+    this.controller,
     this.cursor,
+    this.focusNode,
     Key key,
-    this.padding = const EdgeInsets.all(16),
     this.style,
     this.symbol,
     this.textSelectionColor,
-  }) : super(key: key);
+    this.vnd,
+  })  : assert((controller == null) || (vnd == null)),
+        super(key: key);
+
+  @override
+  _EditableVndState createState() => _EditableVndState();
+}
+
+class _EditableVndState extends State<EditableVnd> {
+  VndEditingController _managedController;
+  VndEditingController get controller =>
+      widget.controller ??
+      (_managedController ??= VndEditingController(vnd: widget.vnd));
+
+  VndFocusNode _managedFocusNode;
+  VndFocusNode get focusNode =>
+      widget.focusNode ?? (_managedFocusNode ??= VndFocusNode());
+
+  Color get autoZerosColor =>
+      widget.autoZerosColor ?? Theme.of(context).dividerColor;
+
+  bool get hasFocus => focusNode.hasFocus;
+
+  Color get textSelectionColor =>
+      widget.textSelectionColor ?? Theme.of(context).textSelectionColor;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final style = this.style ?? theme.textTheme.subtitle1;
-    final cursor = this.cursor ?? _BlinkingCursor(style);
+    final style = widget.style ?? theme.textTheme.subtitle1;
+    final cursor = widget.cursor ?? _BlinkingCursor(style);
     final dismissible = Dismissible(
       child: Text(
         ',000',
-        style: style.copyWith(color: _autoZerosColor(context)),
+        style: style.copyWith(color: autoZerosColor),
       ),
       direction: DismissDirection.up,
       key: ValueKey(controller),
       onDismissed: _disableAutoZeros,
     );
-    final symbol = this.symbol ??
+    final symbol = widget.symbol ??
         Text('đ',
             style: style.copyWith(
               color: theme.disabledColor,
               fontSize: style.fontSize * .7,
             ));
 
-    return Padding(
-      child: AnimatedBuilder(
-        animation: controller,
-        builder: (_, __) => Row(
-          children: [
-            GestureDetector(
-              child: Container(
-                child: Text(_formatValue(), style: style),
-                color:
-                    controller.isSelected ? _textSelectionColor(context) : null,
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (_, __) => Row(
+        children: [
+          GestureDetector(
+            child: AnimatedBuilder(
+              animation: focusNode,
+              builder: (_, child) => Container(
+                child: child,
+                color: !hasFocus
+                    ? null
+                    : (controller.isSelected ? textSelectionColor : null),
               ),
-              onTap: _toggleIsSelected,
+              child: Text(_formatValue(), style: style),
             ),
-            Opacity(
+            onTap: _onTap,
+          ),
+          AnimatedBuilder(
+            animation: focusNode,
+            builder: (_, __) => Opacity(
               child: cursor,
-              opacity: controller.isSelected ? 0 : 1,
+              opacity: !hasFocus ? 0 : (controller.isSelected ? 0 : 1),
             ),
-            Visibility(
-              child: dismissible,
-              visible: controller.autoZeros &&
-                  controller.vnd != controller.value.rawValue,
-            ),
-            symbol,
-          ],
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-        ),
+          ),
+          Visibility(
+            child: dismissible,
+            visible: controller.autoZeros &&
+                controller.vnd != controller.value.rawValue,
+          ),
+          symbol,
+        ],
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
       ),
-      padding: padding,
     );
   }
 
-  Color _autoZerosColor(BuildContext context) =>
-      autoZerosColor ?? Theme.of(context).dividerColor;
+  @override
+  void dispose() {
+    _managedController?.dispose();
+    _managedFocusNode?.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.autofocus == true) {
+      WidgetsBinding.instance.addPostFrameCallback(
+          (_) => focusNode.requestFocus(context, controller));
+    }
+  }
 
   void _disableAutoZeros(DismissDirection _) => controller.autoZeros = false;
 
@@ -122,10 +181,13 @@ class EditableVnd extends StatelessWidget {
     return sb.toString();
   }
 
-  Color _textSelectionColor(BuildContext context) =>
-      textSelectionColor ?? Theme.of(context).textSelectionColor;
-
-  void _toggleIsSelected() => controller.isSelected = !controller.isSelected;
+  void _onTap() {
+    if (!hasFocus) {
+      focusNode.requestFocus(context, controller);
+    } else {
+      controller.isSelected = !controller.isSelected;
+    }
+  }
 }
 
 class _BlinkingCursor extends StatefulWidget {
