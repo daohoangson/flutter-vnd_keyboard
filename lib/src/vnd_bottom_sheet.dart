@@ -9,13 +9,9 @@ class VndBottomSheet extends StatefulWidget {
   /// Controls the value being inputed.
   ///
   /// If null, this widget will create its own [VndEditingController].
-  ///
-  /// [controller] and [vnd] cannot be set at the same time.
   final VndEditingController controller;
 
   /// The initial value.
-  ///
-  /// [vnd] and [controller] cannot be set at the same time.
   final int vnd;
 
   /// Creates a VND bottom sheet.
@@ -23,8 +19,7 @@ class VndBottomSheet extends StatefulWidget {
     this.controller,
     Key key,
     this.vnd,
-  })  : assert((controller == null) || (vnd == null)),
-        super(key: key);
+  }) : super(key: key);
 
   @override
   _VndBottomSheetState createState() => _VndBottomSheetState();

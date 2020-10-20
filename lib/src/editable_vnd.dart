@@ -19,8 +19,6 @@ class EditableVnd extends StatefulWidget {
   /// Controls the value being inputed.
   ///
   /// If null, this widget will create its own [VndEditingController].
-  ///
-  /// [controller] and [vnd] cannot be set at the same time.
   final VndEditingController controller;
 
   /// A widget to display the blinking cursor.
@@ -49,8 +47,6 @@ class EditableVnd extends StatefulWidget {
   final Color textSelectionColor;
 
   /// The initial value.
-  ///
-  /// [vnd] and [controller] cannot be set at the same time.
   final int vnd;
 
   const EditableVnd({
@@ -64,8 +60,7 @@ class EditableVnd extends StatefulWidget {
     this.symbol,
     this.textSelectionColor,
     this.vnd,
-  })  : assert((controller == null) || (vnd == null)),
-        super(key: key);
+  }) : super(key: key);
 
   @override
   _EditableVndState createState() => _EditableVndState();
