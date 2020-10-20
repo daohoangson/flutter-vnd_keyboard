@@ -26,6 +26,11 @@ class EditableVnd extends StatefulWidget {
   /// If null, this widget will create its own widget.
   final Widget cursor;
 
+  /// If false the text field is "disabled": it ignores taps.
+  ///
+  /// Default: `true`.
+  final bool enabled;
+
   /// Defines the keyboard focus for this widget.
   ///
   /// If null, this widget will create its own [VndFocusNode].
@@ -54,6 +59,7 @@ class EditableVnd extends StatefulWidget {
     this.autofocus = false,
     this.controller,
     this.cursor,
+    this.enabled = true,
     this.focusNode,
     Key key,
     this.style,
@@ -89,15 +95,6 @@ class _EditableVndState extends State<EditableVnd> {
     final theme = Theme.of(context);
     final style = widget.style ?? theme.textTheme.subtitle1;
     final cursor = widget.cursor ?? _BlinkingCursor(style);
-    final dismissible = Dismissible(
-      child: Text(
-        ',000',
-        style: style.copyWith(color: autoZerosColor),
-      ),
-      direction: DismissDirection.up,
-      key: ValueKey(controller),
-      onDismissed: _disableAutoZeros,
-    );
     final symbol = widget.symbol ??
         Text('đ',
             style: style.copyWith(
@@ -130,7 +127,20 @@ class _EditableVndState extends State<EditableVnd> {
             ),
           ),
           Visibility(
-            child: dismissible,
+            child: Dismissible(
+              child: AnimatedBuilder(
+                animation: focusNode,
+                builder: (_, __) => Text(
+                  ',000',
+                  style: style.copyWith(
+                    color: hasFocus ? autoZerosColor : null,
+                  ),
+                ),
+              ),
+              direction: DismissDirection.up,
+              key: ValueKey(controller),
+              onDismissed: _disableAutoZeros,
+            ),
             visible: controller.autoZeros &&
                 controller.vnd != controller.value.rawValue,
           ),
@@ -140,6 +150,22 @@ class _EditableVndState extends State<EditableVnd> {
         mainAxisSize: MainAxisSize.min,
       ),
     );
+  }
+
+  @override
+  void didUpdateWidget(EditableVnd oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller ||
+        widget.vnd != oldWidget.vnd) {
+      final outdatedController = _managedController;
+      if (outdatedController != null) {
+        _managedController = null;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          focusNode.unfocus();
+          outdatedController.dispose();
+        });
+      }
+    }
   }
 
   @override
@@ -177,6 +203,8 @@ class _EditableVndState extends State<EditableVnd> {
   }
 
   void _onTap() {
+    if (!widget.enabled) return;
+
     if (!hasFocus) {
       focusNode.requestFocus(context, controller);
     } else {

@@ -24,6 +24,7 @@ void main() async {
         EditableVnd(
           controller:
               VndEditingController.fromValue(VndEditingValue(rawValue: 10)),
+          focusNode: focusedNode,
         ),
       )
       ..addScenario(
@@ -54,11 +55,20 @@ void main() async {
           )),
           focusNode: focusedNode,
         ),
+      )
+      ..addScenario(
+        '10k (auto zeros w/o focus)',
+        EditableVnd(
+          controller: VndEditingController.fromValue(VndEditingValue(
+            rawValue: 10,
+            isSelected: true,
+          )),
+        ),
       );
 
     await tester.pumpWidgetBuilder(
       builder.build(),
-      surfaceSize: Size(810, 180),
+      surfaceSize: Size(810, 270),
     );
     await screenMatchesGolden(
       tester,
@@ -79,7 +89,7 @@ void main() async {
       EditableText.debugDeterministicCursor = debugDeterministicCursor;
     });
 
-    testGoldens('autofocus works', (tester) async {
+    testWidgets('autofocus works', (tester) async {
       final focusNode = VndFocusNode();
       final widget = VndKeyboardProvider(
         child: EditableVnd(
@@ -134,6 +144,69 @@ void main() async {
 
       await tester.tap(find.text('100,000'));
       expect(controller.isSelected, isFalse);
+    });
+
+    testWidgets('enabled=false ignores taps', (tester) async {
+      final controller = VndEditingController(vnd: 100000);
+      final focusNode = VndFocusNode();
+      final widget = VndKeyboardProvider(
+        child: EditableVnd(
+          controller: controller,
+          enabled: false,
+          focusNode: focusNode,
+        ),
+      );
+      await tester.pumpWidget(materialAppWrapper()(widget));
+
+      expect(focusNode.hasFocus, isFalse);
+      await tester.tap(find.text('100,000'));
+      expect(focusNode.hasFocus, isFalse);
+    });
+
+    group('didUpdateWidget', () {
+      testWidgets('updates controller', (tester) async {
+        final controller1 = VndEditingController(vnd: 10000);
+        final controller2 = VndEditingController(vnd: 20000);
+        final key = GlobalKey();
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          controller: controller1,
+          key: key,
+        )));
+        final state1 = key.currentState;
+        expect(find.text('10,000'), findsOneWidget);
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          controller: controller2,
+          key: key,
+        )));
+        final state2 = key.currentState;
+        expect(find.text('20,000'), findsOneWidget);
+
+        expect(identical(state1, state2), isTrue);
+      });
+
+      testWidgets('updates vnd', (tester) async {
+        final vnd1 = 10000;
+        final vnd2 = 20000;
+        final key = GlobalKey();
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          key: key,
+          vnd: vnd1,
+        )));
+        final state1 = key.currentState;
+        expect(find.text('10,000'), findsOneWidget);
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          key: key,
+          vnd: vnd2,
+        )));
+        final state2 = key.currentState;
+        expect(find.text('20,000'), findsOneWidget);
+
+        expect(identical(state1, state2), isTrue);
+      });
     });
   });
 }
