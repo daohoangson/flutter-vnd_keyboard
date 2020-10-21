@@ -75,9 +75,10 @@ class _InheritedWidget extends InheritedWidget {
   bool updateShouldNotify(_InheritedWidget old) => state != old.state;
 }
 
-class _State extends State<VndKeyboardProvider> {
+class _State extends State<VndKeyboardProvider> with WidgetsBindingObserver {
   VndEditingController controller;
   VndFocusNode focusNode;
+  var systemKeyboardIsVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -92,29 +93,49 @@ class _State extends State<VndKeyboardProvider> {
         child,
         Visibility(
           child: VndKeyboard(onTap: onTap),
-          visible: focusNode != null,
+          visible: focusNode != null && !systemKeyboardIsVisible,
         ),
       ],
       mainAxisSize: widget.mainAxisSize,
     );
   }
 
-  void focus(VndFocusNode focusNode, VndEditingController controller) =>
-      setState(() {
-        this.focusNode?._onUnfocused();
+  @override
+  void didChangeMetrics() {
+    final v = WidgetsBinding.instance.window.viewInsets.bottom > 0;
+    if (v != systemKeyboardIsVisible) {
+      setState(() => systemKeyboardIsVisible = v);
+    }
+  }
 
-        this.controller = controller;
-        this.focusNode = focusNode;
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
-        focusNode._onFocused(this);
-      });
+  void focus(VndFocusNode focusNode, VndEditingController controller) {
+    this.focusNode?._onUnfocused();
 
-  void unfocus() => setState(() {
-        focusNode?._onUnfocused();
+    setState(() {
+      this.controller = controller;
+      this.focusNode = focusNode;
+    });
 
-        controller = null;
-        focusNode = null;
-      });
+    focusNode._onFocused(this);
+    _onFocusChange(true);
+  }
+
+  void unfocus() {
+    focusNode?._onUnfocused();
+
+    setState(() {
+      controller = null;
+      focusNode = null;
+    });
+
+    _onFocusChange(false);
+  }
 
   void onTap(KeyboardKey key) {
     switch (key.type) {
@@ -127,6 +148,15 @@ class _State extends State<VndKeyboardProvider> {
       case KeyboardKeyType.value:
         controller?.append(key.value);
         break;
+    }
+  }
+
+  void _onFocusChange(bool hasFocus) {
+    if (hasFocus) {
+      WidgetsBinding.instance.addObserver(this);
+      didChangeMetrics();
+    } else {
+      WidgetsBinding.instance.removeObserver(this);
     }
   }
 }
