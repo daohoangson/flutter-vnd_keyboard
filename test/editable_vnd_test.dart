@@ -102,7 +102,77 @@ void main() async {
       expect(focusNode.hasFocus, true);
     });
 
-    testWidgets('disables autoZeros', (tester) async {
+    testWidgets('onDone is called', (tester) async {
+      final controller = VndEditingController();
+      var done = 0;
+      final widget = VndKeyboardProvider(
+        child: EditableVnd(
+          controller: controller,
+          onDone: (_) => done++,
+        ),
+      );
+      await tester.pumpWidget(materialAppWrapper()(widget));
+
+      expect(done, equals(0));
+      controller.done();
+
+      await tester.runAsync(() => Future.delayed(Duration.zero));
+      expect(done, equals(1));
+    });
+
+    group('textInputAction', () {
+      testWidgets('done dismisses keyboard', (tester) async {
+        final controller = VndEditingController();
+        final widget = VndKeyboardProvider(
+          child: EditableVnd(
+            autofocus: true,
+            controller: controller,
+            textInputAction: TextInputAction.done,
+          ),
+        );
+        await tester.pumpWidget(materialAppWrapper()(widget));
+        await tester.pumpAndSettle();
+
+        await expect(find.bySemanticsLabel('OK'), findsOneWidget);
+        controller.done();
+
+        await tester.pumpAndSettle();
+        await expect(find.bySemanticsLabel('OK'), findsNothing);
+      });
+
+      testWidgets('requests next focus', (tester) async {
+        final controller = VndEditingController();
+        final textFn = FocusNode();
+        final widget = VndKeyboardProvider(
+          child: FocusScope(
+            child: Column(
+              children: [
+                EditableVnd(
+                  autofocus: true,
+                  controller: controller,
+                  textInputAction: TextInputAction.next,
+                ),
+                TextField(
+                  focusNode: textFn,
+                ),
+              ],
+            ),
+          ),
+        );
+        await tester.pumpWidget(materialAppWrapper()(widget));
+        await tester.pumpAndSettle();
+
+        await expect(find.bySemanticsLabel('OK'), findsOneWidget);
+        expect(textFn.hasFocus, isFalse);
+        controller.done();
+
+        await tester.pumpAndSettle();
+        await expect(find.bySemanticsLabel('OK'), findsNothing);
+        expect(textFn.hasFocus, isTrue);
+      });
+    });
+
+    testWidgets('dragging disables autoZeros', (tester) async {
       final controller = VndEditingController.fromValue(
         VndEditingValue(autoZeros: true, rawValue: 100),
       );

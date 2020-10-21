@@ -101,9 +101,7 @@ void main() async {
 
       expect(done, equals(0));
       await tester.tap(find.bySemanticsLabel('OK'));
-      await tester.pumpAndSettle();
       expect(done, equals(1));
-      expect(find.bySemanticsLabel('OK'), findsNothing);
     });
   });
 }

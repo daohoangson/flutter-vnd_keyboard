@@ -1,7 +1,11 @@
-import 'package:flutter/widgets.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 
 import 'vnd_keyboard.dart';
+
+part 'editable_vnd.dart';
 
 /// An object that can be used to obtain the [VndKeyboardProvider] focus.
 class VndFocusNode extends ChangeNotifier {
@@ -130,9 +134,7 @@ class _State extends State<VndKeyboardProvider> {
         controller?.delete();
         break;
       case KeyboardKeyType.done:
-        final outdatedController = controller;
-        unfocus();
-        outdatedController?.done();
+        controller?.done();
         break;
       case KeyboardKeyType.value:
         controller?.append(key.value);

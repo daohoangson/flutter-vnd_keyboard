@@ -1,7 +1,4 @@
-import 'package:flutter/material.dart';
-
-import 'vnd_editing_controller.dart';
-import 'vnd_keyboard_provider.dart';
+part of 'vnd_keyboard_provider.dart';
 
 /// A Vietnamese đồng editable widget.
 class EditableVnd extends StatefulWidget {
@@ -36,6 +33,9 @@ class EditableVnd extends StatefulWidget {
   /// If null, this widget will create its own [VndFocusNode].
   final VndFocusNode focusNode;
 
+  /// Called when the user indicates that they are done.
+  final ValueChanged<int> onDone;
+
   /// The style to use for the text being edited.
   ///
   /// Default: [TextTheme.subtitle1].
@@ -45,6 +45,17 @@ class EditableVnd extends StatefulWidget {
   ///
   /// If null, this widget will create its own widget.
   final Widget symbol;
+
+  /// The type of action button to use for the keyboard.
+  ///
+  /// Values and associated action when user taps Done:
+  ///
+  /// - [TextInputAction.done] -> unfocus (keyboard goes away)
+  /// - [TextInputAction.next] -> next focus
+  /// - Anything else will trigger no action
+  ///
+  /// Default [TextInputAction.done].
+  final TextInputAction textInputAction;
 
   /// The color for selection background.
   ///
@@ -62,8 +73,10 @@ class EditableVnd extends StatefulWidget {
     this.enabled = true,
     this.focusNode,
     Key key,
+    this.onDone,
     this.style,
     this.symbol,
+    this.textInputAction = TextInputAction.done,
     this.textSelectionColor,
     this.vnd,
   }) : super(key: key);
@@ -73,6 +86,8 @@ class EditableVnd extends StatefulWidget {
 }
 
 class _EditableVndState extends State<EditableVnd> {
+  StreamSubscription _doneSubscription;
+
   VndEditingController _managedController;
   VndEditingController get controller =>
       widget.controller ??
@@ -102,39 +117,29 @@ class _EditableVndState extends State<EditableVnd> {
               fontSize: style.fontSize * .7,
             ));
 
-    return AnimatedBuilder(
-      animation: controller,
+    Widget built = AnimatedBuilder(
+      animation: Listenable.merge([controller, focusNode]),
       builder: (_, __) => Row(
         children: [
           GestureDetector(
-            child: AnimatedBuilder(
-              animation: focusNode,
-              builder: (_, child) => Container(
-                child: child,
-                color: !hasFocus
-                    ? null
-                    : (controller.isSelected ? textSelectionColor : null),
-              ),
+            child: Container(
               child: Text(_formatValue(), style: style),
+              color: !hasFocus
+                  ? null
+                  : (controller.isSelected ? textSelectionColor : null),
             ),
             onTap: _onTap,
           ),
-          AnimatedBuilder(
-            animation: focusNode,
-            builder: (_, __) => Opacity(
-              child: cursor,
-              opacity: !hasFocus ? 0 : (controller.isSelected ? 0 : 1),
-            ),
+          Opacity(
+            child: cursor,
+            opacity: !hasFocus ? 0 : (controller.isSelected ? 0 : 1),
           ),
           Visibility(
             child: Dismissible(
-              child: AnimatedBuilder(
-                animation: focusNode,
-                builder: (_, __) => Text(
-                  ',000',
-                  style: style.copyWith(
-                    color: hasFocus ? autoZerosColor : null,
-                  ),
+              child: Text(
+                ',000',
+                style: style.copyWith(
+                  color: hasFocus ? autoZerosColor : null,
                 ),
               ),
               direction: DismissDirection.up,
@@ -150,6 +155,13 @@ class _EditableVndState extends State<EditableVnd> {
         mainAxisSize: MainAxisSize.min,
       ),
     );
+
+    built = Focus(
+      child: built,
+      focusNode: focusNode._flutter,
+    );
+
+    return built;
   }
 
   @override
@@ -157,6 +169,8 @@ class _EditableVndState extends State<EditableVnd> {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller ||
         widget.vnd != oldWidget.vnd) {
+      _doneSubscription?.cancel();
+
       final outdatedController = _managedController;
       if (outdatedController != null) {
         _managedController = null;
@@ -165,11 +179,19 @@ class _EditableVndState extends State<EditableVnd> {
           outdatedController.dispose();
         });
       }
+
+      _doneSubscription = controller.onDone(_onDone);
+    }
+
+    if (widget.focusNode != oldWidget.focusNode) {
+      _managedFocusNode?.dispose();
+      _managedFocusNode = null;
     }
   }
 
   @override
   void dispose() {
+    _doneSubscription?.cancel();
     _managedController?.dispose();
     _managedFocusNode?.dispose();
     super.dispose();
@@ -178,6 +200,7 @@ class _EditableVndState extends State<EditableVnd> {
   @override
   void initState() {
     super.initState();
+    _doneSubscription = controller.onDone(_onDone);
     if (widget.autofocus == true) {
       WidgetsBinding.instance.addPostFrameCallback(
           (_) => focusNode.requestFocus(context, controller));
@@ -200,6 +223,21 @@ class _EditableVndState extends State<EditableVnd> {
     }
 
     return sb.toString();
+  }
+
+  void _onDone(VndEditingController controller) {
+    switch (widget.textInputAction) {
+      case TextInputAction.done:
+        focusNode.unfocus();
+        break;
+      case TextInputAction.next:
+        FocusScope.of(context).nextFocus();
+        break;
+      default:
+      // do nothing
+    }
+
+    widget.onDone?.call(controller.vnd);
   }
 
   void _onTap() {
