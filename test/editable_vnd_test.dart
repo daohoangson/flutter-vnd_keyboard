@@ -256,6 +256,34 @@ void main() async {
         expect(identical(state1, state2), isTrue);
       });
 
+      testWidgets('updates focusNode', (tester) async {
+        final focusNode1 = VndFocusNode();
+        final focusNode2 = VndFocusNode();
+        final key = GlobalKey();
+
+        final symbolKey = GlobalKey();
+        final symbol = SizedBox(key: symbolKey);
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          focusNode: focusNode1,
+          key: key,
+          symbol: symbol,
+        )));
+        final state1 = key.currentState;
+        final flutterFn1 = Focus.of(symbolKey.currentContext);
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          focusNode: focusNode2,
+          key: key,
+          symbol: symbol,
+        )));
+        final state2 = key.currentState;
+        final flutterFn2 = Focus.of(symbolKey.currentContext);
+
+        expect(identical(state1, state2), isTrue);
+        expect(identical(flutterFn1, flutterFn2), isFalse);
+      });
+
       testWidgets('updates vnd', (tester) async {
         final vnd1 = 10000;
         final vnd2 = 20000;
