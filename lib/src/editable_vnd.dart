@@ -100,6 +100,8 @@ class _EditableVndState extends State<EditableVnd> {
   Color get autoZerosColor =>
       widget.autoZerosColor ?? Theme.of(context).dividerColor;
 
+  bool get enabled => widget.enabled != false;
+
   bool get hasFocus => focusNode.hasFocus;
 
   Color get textSelectionColor =>
@@ -159,6 +161,7 @@ class _EditableVndState extends State<EditableVnd> {
     built = Focus(
       child: built,
       focusNode: focusNode._flutter,
+      onFocusChange: _onFlutterFocusChange,
     );
 
     return built;
@@ -187,6 +190,11 @@ class _EditableVndState extends State<EditableVnd> {
       _managedFocusNode?.dispose();
       _managedFocusNode = null;
     }
+
+    if (widget.enabled != oldWidget.enabled) {
+      focusNode._flutter?.canRequestFocus = enabled;
+      focusNode._flutter?.skipTraversal = !enabled;
+    }
   }
 
   @override
@@ -201,10 +209,14 @@ class _EditableVndState extends State<EditableVnd> {
   void initState() {
     super.initState();
     _doneSubscription = controller.onDone(_onDone);
+
     if (widget.autofocus == true) {
-      WidgetsBinding.instance.addPostFrameCallback(
-          (_) => focusNode.requestFocus(context, controller));
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => focusNode.requestFocus());
     }
+
+    focusNode._flutter?.canRequestFocus = enabled;
+    focusNode._flutter?.skipTraversal = !enabled;
   }
 
   void _disableAutoZeros(DismissDirection _) => controller.autoZeros = false;
@@ -240,11 +252,23 @@ class _EditableVndState extends State<EditableVnd> {
     widget.onDone?.call(controller.vnd);
   }
 
+  void _onFlutterFocusChange(bool hasFlutterFocus) {
+    if (focusNode.hasFocus == hasFlutterFocus) return;
+    if (hasFlutterFocus) {
+      context
+          ?.dependOnInheritedWidgetOfExactType<_InheritedWidget>()
+          ?.state
+          ?.focus(focusNode, controller);
+    } else {
+      focusNode._state?.unfocus();
+    }
+  }
+
   void _onTap() {
-    if (!widget.enabled) return;
+    if (!enabled) return;
 
     if (!hasFocus) {
-      focusNode.requestFocus(context, controller);
+      focusNode.requestFocus();
     } else {
       controller.isSelected = !controller.isSelected;
     }

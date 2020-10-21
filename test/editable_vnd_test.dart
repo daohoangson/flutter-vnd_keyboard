@@ -170,6 +170,35 @@ void main() async {
         await expect(find.bySemanticsLabel('OK'), findsNothing);
         expect(textFn.hasFocus, isTrue);
       });
+
+      testWidgets('receives next focus', (tester) async {
+        final key = GlobalKey();
+        final textFn = FocusNode();
+        final widget = VndKeyboardProvider(
+          child: FocusScope(
+            child: Column(
+              children: [
+                TextField(
+                  autofocus: true,
+                  focusNode: textFn,
+                ),
+                EditableVnd(),
+              ],
+              key: key,
+            ),
+          ),
+        );
+        await tester.pumpWidget(materialAppWrapper()(widget));
+        await tester.pumpAndSettle();
+
+        await expect(find.bySemanticsLabel('OK'), findsNothing);
+        expect(textFn.hasFocus, isTrue);
+        FocusScope.of(key.currentContext).nextFocus();
+
+        await tester.pumpAndSettle();
+        await expect(find.bySemanticsLabel('OK'), findsOneWidget);
+        expect(textFn.hasFocus, isFalse);
+      });
     });
 
     testWidgets('dragging disables autoZeros', (tester) async {
@@ -252,6 +281,31 @@ void main() async {
         )));
         final state2 = key.currentState;
         expect(find.text('20,000'), findsOneWidget);
+
+        expect(identical(state1, state2), isTrue);
+      });
+
+      testWidgets('updates enabled', (tester) async {
+        final focusNode = VndFocusNode();
+        final key = GlobalKey();
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          enabled: true,
+          focusNode: focusNode,
+          key: key,
+        )));
+        final state1 = key.currentState;
+        expect(focusNode.canRequestFocus, isTrue);
+        expect(focusNode.skipTraversal, isFalse);
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          enabled: false,
+          focusNode: focusNode,
+          key: key,
+        )));
+        final state2 = key.currentState;
+        expect(focusNode.canRequestFocus, isFalse);
+        expect(focusNode.skipTraversal, isTrue);
 
         expect(identical(state1, state2), isTrue);
       });

@@ -12,13 +12,15 @@ class VndFocusNode extends ChangeNotifier {
   final _flutter = FocusNode();
   _State _state;
 
-  /// Creates a focus node.
-  VndFocusNode() {
-    _flutter.addListener(_onFlutterChanged);
-  }
+  /// If true, this focus node may request the primary focus.
+  bool get canRequestFocus => _flutter.canRequestFocus;
 
   /// Whether this node has input focus.
   bool get hasFocus => _state != null;
+
+  /// If true, tells the focus traversal policy to skip over this node for
+  /// purposes of the traversal algorithm.
+  bool get skipTraversal => _flutter.skipTraversal;
 
   @override
   void dispose() {
@@ -27,17 +29,10 @@ class VndFocusNode extends ChangeNotifier {
   }
 
   /// Requests the primary focus for this node.
-  void requestFocus(BuildContext context, VndEditingController controller) {
-    final state =
-        context.dependOnInheritedWidgetOfExactType<_InheritedWidget>()?.state;
-    if (state == null) return;
-
-    state.focus(this, controller);
-    FocusScope.of(context).requestFocus(_flutter);
-  }
+  void requestFocus() => _flutter.requestFocus();
 
   /// Removes the focus on this node.
-  void unfocus() => _state?.unfocus();
+  void unfocus() => _flutter.unfocus();
 
   void _onFocused(_State state) {
     _state = state;
@@ -47,13 +42,6 @@ class VndFocusNode extends ChangeNotifier {
   void _onUnfocused() {
     _state = null;
     notifyListeners();
-  }
-
-  void _onFlutterChanged() {
-    if (!_flutter.hasFocus) {
-      // keyboard is coming up for some other node, hide our keyboard
-      unfocus();
-    }
   }
 }
 
