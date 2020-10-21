@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// A controller for an editable VND widget.
 class VndEditingController extends ValueNotifier<VndEditingValue> {
+  final _doneController = StreamController<VndEditingController>.broadcast();
+
   /// Creates a controller for an editable VND widget.
   VndEditingController({int vnd})
       : super(vnd == null
@@ -55,6 +59,20 @@ class VndEditingController extends ValueNotifier<VndEditingValue> {
       value = value.copyWith(rawValue: int.tryParse(deleted) ?? 0);
     }
   }
+
+  @override
+  void dispose() {
+    _doneController.close();
+    super.dispose();
+  }
+
+  /// Marks input as done.
+  void done() => _doneController.sink.add(this);
+
+  /// Adds a subscription for Done events.
+  StreamSubscription<VndEditingController> onDone(
+          void Function(VndEditingController controller) listener) =>
+      _doneController.stream.listen(listener);
 }
 
 /// The current state while editing a VND value.
