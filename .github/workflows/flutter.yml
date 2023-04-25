@@ -10,6 +10,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
+        with:
+          cache: true
       - run: flutter pub get
       - name: Run flutter format
         run: flutter format --dry-run --set-exit-if-changed .
@@ -28,6 +30,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
+          cache: true
           channel: ${{ matrix.channel }}
       - name: Run flutter test
         run: |
