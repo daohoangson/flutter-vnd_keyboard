@@ -6,17 +6,17 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 void main() async {
   testGoldens('looks correct', (tester) async {
     final widget = Column(
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         RepaintBoundary(
           child: Builder(
-            builder: (context) => Container(
+            builder: (context) => ColoredBox(
               color: Theme.of(context).canvasColor,
-              child: VndKeyboard(),
+              child: const VndKeyboard(),
             ),
           ),
         ),
       ],
-      mainAxisAlignment: MainAxisAlignment.end,
     );
 
     await tester.pumpWidgetBuilder(

@@ -3,17 +3,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 
-import 'vnd_keyboard.dart';
-
 part 'editable_vnd.dart';
 
 /// An object that can be used to obtain the [VndKeyboardProvider] focus.
 class VndFocusNode extends ChangeNotifier {
   final _flutter = FocusNode();
-  _State _state;
+  _State? _state;
 
   /// If true, this focus node may request the primary focus.
   bool get canRequestFocus => _flutter.canRequestFocus;
+
+  /// Returns built-in focus node.
+  FocusNode? get flutter => _flutter;
 
   /// Whether this node has input focus.
   bool get hasFocus => _state != null;
@@ -57,10 +58,10 @@ class VndKeyboardProvider extends StatefulWidget {
 
   /// Creates a keyboard provider.
   const VndKeyboardProvider({
-    Key key,
-    @required this.child,
+    super.key,
+    required this.child,
     this.mainAxisSize = MainAxisSize.max,
-  }) : super(key: key);
+  }) : super();
 
   @override
   State<VndKeyboardProvider> createState() => _State();
@@ -68,17 +69,17 @@ class VndKeyboardProvider extends StatefulWidget {
 
 class _InheritedWidget extends InheritedWidget {
   final _State state;
-  const _InheritedWidget(this.state, Widget child, {Key key})
-      : super(key: key, child: child);
+  const _InheritedWidget(this.state, Widget child) : super(child: child);
 
   @override
   bool updateShouldNotify(_InheritedWidget old) => state != old.state;
 }
 
 class _State extends State<VndKeyboardProvider> with WidgetsBindingObserver {
-  VndEditingController controller;
-  VndFocusNode focusNode;
-  var systemKeyboardIsVisible = false;
+  VndEditingController? controller;
+  VndFocusNode? focusNode;
+
+  var _systemKeyboardIsVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -89,22 +90,22 @@ class _State extends State<VndKeyboardProvider> with WidgetsBindingObserver {
     }
 
     return Column(
+      mainAxisSize: widget.mainAxisSize,
       children: [
         child,
         Visibility(
+          visible: focusNode != null && !_systemKeyboardIsVisible,
           child: VndKeyboard(onTap: onTap),
-          visible: focusNode != null && !systemKeyboardIsVisible,
         ),
       ],
-      mainAxisSize: widget.mainAxisSize,
     );
   }
 
   @override
   void didChangeMetrics() {
     final v = WidgetsBinding.instance.window.viewInsets.bottom > 0;
-    if (v != systemKeyboardIsVisible) {
-      setState(() => systemKeyboardIsVisible = v);
+    if (v != _systemKeyboardIsVisible) {
+      setState(() => _systemKeyboardIsVisible = v);
     }
   }
 
@@ -146,7 +147,7 @@ class _State extends State<VndKeyboardProvider> with WidgetsBindingObserver {
         controller?.done();
         break;
       case KeyboardKeyType.value:
-        controller?.append(key.value);
+        controller?.append(key.value!);
         break;
     }
   }

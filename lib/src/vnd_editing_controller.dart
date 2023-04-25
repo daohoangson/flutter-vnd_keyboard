@@ -8,14 +8,16 @@ class VndEditingController extends ValueNotifier<VndEditingValue> {
   final _doneController = StreamController<VndEditingController>.broadcast();
 
   /// Creates a controller for an editable VND widget.
-  VndEditingController({int vnd})
-      : super(vnd == null
-            ? VndEditingValue.zero
-            : VndEditingValue(autoZeros: false, rawValue: vnd));
+  VndEditingController({int? vnd})
+      : super(
+          vnd == null
+              ? VndEditingValue.zero
+              : VndEditingValue(autoZeros: false, rawValue: vnd),
+        );
 
   /// Creates a controller for an editable VND widget
   /// from an initial [VndEditingValue].
-  VndEditingController.fromValue(VndEditingValue value) : super(value);
+  VndEditingController.fromValue(super.value) : super();
 
   /// Returns `true` if auto zeros is enabled.
   bool get autoZeros => value.autoZeros;
@@ -71,7 +73,8 @@ class VndEditingController extends ValueNotifier<VndEditingValue> {
 
   /// Adds a subscription for Done events.
   StreamSubscription<VndEditingController> onDone(
-          void Function(VndEditingController controller) listener) =>
+    void Function(VndEditingController controller) listener,
+  ) =>
       _doneController.stream.listen(listener);
 }
 
@@ -102,9 +105,9 @@ class VndEditingValue {
 
   /// Creates a copy with the given fields replaced with the new values.
   VndEditingValue copyWith({
-    bool autoZeros,
-    bool isSelected,
-    int rawValue,
+    bool? autoZeros,
+    bool? isSelected,
+    int? rawValue,
   }) =>
       VndEditingValue(
         autoZeros: autoZeros ?? this.autoZeros,

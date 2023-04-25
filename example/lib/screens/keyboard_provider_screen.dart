@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 
 class KeyboardProviderScreen extends StatefulWidget {
+  const KeyboardProviderScreen({super.key});
+
   @override
   State<KeyboardProviderScreen> createState() => _KeyboardProviderState();
 }
@@ -16,14 +17,16 @@ class _KeyboardProviderState extends State<KeyboardProviderScreen> {
 
   @override
   Widget build(BuildContext _) => Scaffold(
-        appBar: AppBar(title: Text('Keyboard Provider')),
+        appBar: AppBar(
+          title: const Text('Keyboard Provider'),
+        ),
         body: VndKeyboardProvider(
           child: FocusScope(
             child: ListView(
               children: [
-                _TextListTile('Title'),
+                const _TextListTile('Title'),
                 _VndListTile('Price', price, priceFn),
-                _TextListTile('Note'),
+                const _TextListTile('Note'),
                 _VndListTile('Shipping', shipping, shippingFn),
                 _TotalListTile(price: price, shipping: shipping),
               ],
@@ -49,12 +52,7 @@ class _VndListTile extends StatefulWidget {
   final VndFocusNode focusNode;
   final String title;
 
-  const _VndListTile(
-    this.title,
-    this.controller,
-    this.focusNode, {
-    Key key,
-  }) : super(key: key);
+  const _VndListTile(this.title, this.controller, this.focusNode) : super();
 
   @override
   State<_VndListTile> createState() => _VndListTileState();
@@ -89,7 +87,7 @@ class _VndListTileState extends State<_VndListTile> {
 class _TextListTile extends StatelessWidget {
   final String title;
 
-  const _TextListTile(this.title, {Key key}) : super(key: key);
+  const _TextListTile(this.title) : super();
 
   @override
   Widget build(BuildContext _) => ListTile(
@@ -107,14 +105,17 @@ class _TotalListTile extends StatelessWidget {
   final VndEditingController price;
   final VndEditingController shipping;
 
-  const _TotalListTile({Key key, this.price, this.shipping}) : super(key: key);
+  const _TotalListTile({required this.price, required this.shipping}) : super();
 
   @override
   Widget build(BuildContext context) => Container(
+        color: Theme.of(context).secondaryHeaderColor,
         child: ListTile(
           title: Row(
             children: [
-              Expanded(child: Text('Total')),
+              const Expanded(
+                child: Text('Total'),
+              ),
               AnimatedBuilder(
                 animation: Listenable.merge([price, shipping]),
                 builder: (_, __) => EditableVnd(
@@ -125,6 +126,5 @@ class _TotalListTile extends StatelessWidget {
             ],
           ),
         ),
-        color: Theme.of(context).secondaryHeaderColor,
       );
 }

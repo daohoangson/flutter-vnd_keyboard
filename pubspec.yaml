@@ -1,12 +1,11 @@
 name: flutter_vnd_keyboard
 description: Vietnamese đồng keyboard for Flutter.
 version: 0.0.1
-author: Dao Hoang Son <pub.dev@daohoangson.com>
 homepage: https://github.com/daohoangson/flutter-vnd_keyboard
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
-  flutter: ">=1.17.0 <2.0.0"
+  sdk: ">=2.19.0 <3.0.0"
+  flutter: ">=3.7.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -15,9 +14,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  golden_toolkit: ^0.6.0
-  mockito: ^4.1.2
-  pedantic: ^1.9.0
+  golden_toolkit: ^0.15.0
+  lint: ^2.0.1
+  mocktail: ^0.3.0
 
 flutter:
   assets:
