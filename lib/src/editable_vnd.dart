@@ -59,7 +59,7 @@ class EditableVnd extends StatefulWidget {
 
   /// The color for selection background.
   ///
-  /// Default: [ThemeData.textSelectionColor].
+  /// Default: [DefaultSelectionStyle.selectionColor].
   final Color? textSelectionColor;
 
   /// The initial value.
@@ -106,7 +106,7 @@ class _EditableVndState extends State<EditableVnd> {
 
   Color? get textSelectionColor =>
       widget.textSelectionColor ??
-      Theme.of(context).textSelectionTheme.selectionColor;
+      DefaultSelectionStyle.of(context).selectionColor;
 
   @override
   Widget build(BuildContext context) {
@@ -290,7 +290,7 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
   Widget build(BuildContext context) => Opacity(
         opacity: animation.value,
         child: Container(
-          color: Theme.of(context).textSelectionTheme.cursorColor,
+          color: DefaultSelectionStyle.of(context).cursorColor,
           height: height,
           width: 2,
         ),
