@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 
 /// A controller for an editable VND widget.
 class VndEditingController extends ValueNotifier<VndEditingValue> {
@@ -76,6 +77,17 @@ class VndEditingController extends ValueNotifier<VndEditingValue> {
     void Function(VndEditingController controller) listener,
   ) =>
       _doneController.stream.listen(listener);
+
+  void onTap(KeyboardKey key) {
+    switch (key.type) {
+      case KeyboardKeyType.delete:
+        return delete();
+      case KeyboardKeyType.done:
+        return done();
+      case KeyboardKeyType.value:
+        return append(key.value!);
+    }
+  }
 }
 
 /// The current state while editing a VND value.

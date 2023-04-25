@@ -139,17 +139,7 @@ class _State extends State<VndKeyboardProvider> with WidgetsBindingObserver {
   }
 
   void onTap(KeyboardKey key) {
-    switch (key.type) {
-      case KeyboardKeyType.delete:
-        controller?.delete();
-        break;
-      case KeyboardKeyType.done:
-        controller?.done();
-        break;
-      case KeyboardKeyType.value:
-        controller?.append(key.value!);
-        break;
-    }
+    return controller?.onTap(key);
   }
 
   void _onFocusChange(bool hasFocus) {
