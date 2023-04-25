@@ -133,6 +133,20 @@ void main() {
     });
   });
 
+  group('done', () {
+    test('marks as done', () async {
+      final controller = VndEditingController();
+      var done = 0;
+      controller.onDone((_) => done++);
+
+      expect(done, equals(0));
+      controller.done();
+
+      await Future.delayed(Duration.zero);
+      expect(done, equals(1));
+    });
+  });
+
   group('vnd', () {
     group('autoZeros=false', () {
       test('rawValue=1', () {

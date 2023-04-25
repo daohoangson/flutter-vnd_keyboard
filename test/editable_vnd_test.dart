@@ -3,44 +3,73 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 import 'package:flutter_vnd_keyboard/src/vnd_editing_controller.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
+import 'package:mockito/mockito.dart';
 
 void main() async {
   testGoldens('looks correct', (tester) async {
-    final builder = GoldenBuilder.grid(columns: 2, widthToHeightRatio: 2)
+    final focusedNode = _MockFocusNode();
+    when(focusedNode.hasFocus).thenReturn(true);
+
+    final builder = GoldenBuilder.grid(columns: 3, widthToHeightRatio: 3)
       ..addScenario(
         '0đ',
-        EditableVnd(VndEditingController()),
+        EditableVnd(),
       )
       ..addScenario(
         '10,000đ',
-        EditableVnd(VndEditingController(vnd: 10000)),
+        EditableVnd(vnd: 10000),
       )
       ..addScenario(
-        '10,000đ (auto zeros)',
+        '10k (auto zeros)',
         EditableVnd(
-          VndEditingController.fromValue(VndEditingValue(rawValue: 10)),
+          controller:
+              VndEditingController.fromValue(VndEditingValue(rawValue: 10)),
+          focusNode: focusedNode,
         ),
       )
       ..addScenario(
-        '10,000đ (selected)',
+        '10,000đ (selected w/o focus)',
         EditableVnd(
-          VndEditingController.fromValue(VndEditingValue(
+          controller: VndEditingController.fromValue(VndEditingValue(
             rawValue: 10000,
             isSelected: true,
           )),
         ),
       )
       ..addScenario(
-        '10,000đ (auto zeros, selected)',
+        '10,000đ (selected)',
         EditableVnd(
-          VndEditingController.fromValue(VndEditingValue(
+          controller: VndEditingController.fromValue(VndEditingValue(
+            rawValue: 10000,
+            isSelected: true,
+          )),
+          focusNode: focusedNode,
+        ),
+      )
+      ..addScenario(
+        '10k (auto zeros, selected)',
+        EditableVnd(
+          controller: VndEditingController.fromValue(VndEditingValue(
+            rawValue: 10,
+            isSelected: true,
+          )),
+          focusNode: focusedNode,
+        ),
+      )
+      ..addScenario(
+        '10k (auto zeros w/o focus)',
+        EditableVnd(
+          controller: VndEditingController.fromValue(VndEditingValue(
             rawValue: 10,
             isSelected: true,
           )),
         ),
       );
 
-    await tester.pumpWidgetBuilder(builder.build());
+    await tester.pumpWidgetBuilder(
+      builder.build(),
+      surfaceSize: Size(810, 270),
+    );
     await screenMatchesGolden(
       tester,
       'editable_vnd',
@@ -60,11 +89,124 @@ void main() async {
       EditableText.debugDeterministicCursor = debugDeterministicCursor;
     });
 
-    testWidgets('disables autoZeros', (tester) async {
+    testWidgets('autofocus works', (tester) async {
+      final focusNode = VndFocusNode();
+      final widget = VndKeyboardProvider(
+        child: EditableVnd(
+          autofocus: true,
+          focusNode: focusNode,
+        ),
+      );
+      await tester.pumpWidget(materialAppWrapper()(widget));
+
+      expect(focusNode.hasFocus, true);
+    });
+
+    testWidgets('onDone is called', (tester) async {
+      final controller = VndEditingController();
+      var done = 0;
+      final widget = VndKeyboardProvider(
+        child: EditableVnd(
+          controller: controller,
+          onDone: (_) => done++,
+        ),
+      );
+      await tester.pumpWidget(materialAppWrapper()(widget));
+
+      expect(done, equals(0));
+      controller.done();
+
+      await tester.runAsync(() => Future.delayed(Duration.zero));
+      expect(done, equals(1));
+    });
+
+    group('textInputAction', () {
+      testWidgets('done dismisses keyboard', (tester) async {
+        final controller = VndEditingController();
+        final widget = VndKeyboardProvider(
+          child: EditableVnd(
+            autofocus: true,
+            controller: controller,
+            textInputAction: TextInputAction.done,
+          ),
+        );
+        await tester.pumpWidget(materialAppWrapper()(widget));
+        await tester.pumpAndSettle();
+
+        await expect(find.bySemanticsLabel('OK'), findsOneWidget);
+        controller.done();
+
+        await tester.pumpAndSettle();
+        await expect(find.bySemanticsLabel('OK'), findsNothing);
+      });
+
+      testWidgets('requests next focus', (tester) async {
+        final controller = VndEditingController();
+        final textFn = FocusNode();
+        final widget = VndKeyboardProvider(
+          child: FocusScope(
+            child: Column(
+              children: [
+                EditableVnd(
+                  autofocus: true,
+                  controller: controller,
+                  textInputAction: TextInputAction.next,
+                ),
+                TextField(
+                  focusNode: textFn,
+                ),
+              ],
+            ),
+          ),
+        );
+        await tester.pumpWidget(materialAppWrapper()(widget));
+        await tester.pumpAndSettle();
+
+        await expect(find.bySemanticsLabel('OK'), findsOneWidget);
+        expect(textFn.hasFocus, isFalse);
+        controller.done();
+
+        await tester.pumpAndSettle();
+        await expect(find.bySemanticsLabel('OK'), findsNothing);
+        expect(textFn.hasFocus, isTrue);
+      });
+
+      testWidgets('receives next focus', (tester) async {
+        final key = GlobalKey();
+        final textFn = FocusNode();
+        final widget = VndKeyboardProvider(
+          child: FocusScope(
+            child: Column(
+              children: [
+                TextField(
+                  autofocus: true,
+                  focusNode: textFn,
+                ),
+                EditableVnd(),
+              ],
+              key: key,
+            ),
+          ),
+        );
+        await tester.pumpWidget(materialAppWrapper()(widget));
+        await tester.pumpAndSettle();
+
+        await expect(find.bySemanticsLabel('OK'), findsNothing);
+        expect(textFn.hasFocus, isTrue);
+        FocusScope.of(key.currentContext).nextFocus();
+
+        await tester.pumpAndSettle();
+        await expect(find.bySemanticsLabel('OK'), findsOneWidget);
+        expect(textFn.hasFocus, isFalse);
+      });
+    });
+
+    testWidgets('dragging disables autoZeros', (tester) async {
       final controller = VndEditingController.fromValue(
         VndEditingValue(autoZeros: true, rawValue: 100),
       );
-      await tester.pumpWidget(materialAppWrapper()(EditableVnd(controller)));
+      await tester.pumpWidget(
+          materialAppWrapper()(EditableVnd(controller: controller)));
 
       expect(controller.autoZeros, isTrue);
       expect(controller.vnd, equals(100000));
@@ -79,11 +221,22 @@ void main() async {
       expect(controller.vnd, equals(100));
     });
 
-    testWidgets('toggles isSelected', (tester) async {
+    testWidgets('tapping works', (tester) async {
       final controller = VndEditingController(vnd: 100000);
-      await tester.pumpWidget(materialAppWrapper()(EditableVnd(controller)));
+      final focusNode = VndFocusNode();
+      final widget = VndKeyboardProvider(
+        child: EditableVnd(
+          controller: controller,
+          focusNode: focusNode,
+        ),
+      );
+      await tester.pumpWidget(materialAppWrapper()(widget));
+
+      expect(focusNode.hasFocus, isFalse);
+      await tester.tap(find.text('100,000'));
 
       expect(controller.isSelected, isFalse);
+      expect(focusNode.hasFocus, isTrue);
 
       await tester.tap(find.text('100,000'));
       expect(controller.isSelected, isTrue);
@@ -91,5 +244,123 @@ void main() async {
       await tester.tap(find.text('100,000'));
       expect(controller.isSelected, isFalse);
     });
+
+    testWidgets('enabled=false ignores taps', (tester) async {
+      final controller = VndEditingController(vnd: 100000);
+      final focusNode = VndFocusNode();
+      final widget = VndKeyboardProvider(
+        child: EditableVnd(
+          controller: controller,
+          enabled: false,
+          focusNode: focusNode,
+        ),
+      );
+      await tester.pumpWidget(materialAppWrapper()(widget));
+
+      expect(focusNode.hasFocus, isFalse);
+      await tester.tap(find.text('100,000'));
+      expect(focusNode.hasFocus, isFalse);
+    });
+
+    group('didUpdateWidget', () {
+      testWidgets('updates controller', (tester) async {
+        final controller1 = VndEditingController(vnd: 10000);
+        final controller2 = VndEditingController(vnd: 20000);
+        final key = GlobalKey();
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          controller: controller1,
+          key: key,
+        )));
+        final state1 = key.currentState;
+        expect(find.text('10,000'), findsOneWidget);
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          controller: controller2,
+          key: key,
+        )));
+        final state2 = key.currentState;
+        expect(find.text('20,000'), findsOneWidget);
+
+        expect(identical(state1, state2), isTrue);
+      });
+
+      testWidgets('updates enabled', (tester) async {
+        final focusNode = VndFocusNode();
+        final key = GlobalKey();
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          enabled: true,
+          focusNode: focusNode,
+          key: key,
+        )));
+        final state1 = key.currentState;
+        expect(focusNode.canRequestFocus, isTrue);
+        expect(focusNode.skipTraversal, isFalse);
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          enabled: false,
+          focusNode: focusNode,
+          key: key,
+        )));
+        final state2 = key.currentState;
+        expect(focusNode.canRequestFocus, isFalse);
+        expect(focusNode.skipTraversal, isTrue);
+
+        expect(identical(state1, state2), isTrue);
+      });
+
+      testWidgets('updates focusNode', (tester) async {
+        final focusNode1 = VndFocusNode();
+        final focusNode2 = VndFocusNode();
+        final key = GlobalKey();
+
+        final symbolKey = GlobalKey();
+        final symbol = SizedBox(key: symbolKey);
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          focusNode: focusNode1,
+          key: key,
+          symbol: symbol,
+        )));
+        final state1 = key.currentState;
+        final flutterFn1 = Focus.of(symbolKey.currentContext);
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          focusNode: focusNode2,
+          key: key,
+          symbol: symbol,
+        )));
+        final state2 = key.currentState;
+        final flutterFn2 = Focus.of(symbolKey.currentContext);
+
+        expect(identical(state1, state2), isTrue);
+        expect(identical(flutterFn1, flutterFn2), isFalse);
+      });
+
+      testWidgets('updates vnd', (tester) async {
+        final vnd1 = 10000;
+        final vnd2 = 20000;
+        final key = GlobalKey();
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          key: key,
+          vnd: vnd1,
+        )));
+        final state1 = key.currentState;
+        expect(find.text('10,000'), findsOneWidget);
+
+        await tester.pumpWidget(materialAppWrapper()(EditableVnd(
+          key: key,
+          vnd: vnd2,
+        )));
+        final state2 = key.currentState;
+        expect(find.text('20,000'), findsOneWidget);
+
+        expect(identical(state1, state2), isTrue);
+      });
+    });
   });
 }
+
+class _MockFocusNode extends Mock implements VndFocusNode {}
