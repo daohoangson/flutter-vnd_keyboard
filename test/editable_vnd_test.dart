@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 
 void main() async {
   testGoldens('looks correct', (tester) async {
     final focusedNode = _MockFocusNode();
-    when(focusedNode.hasFocus).thenReturn(true);
+    when(() => focusedNode.hasFocus).thenReturn(true);
 
     final builder = GoldenBuilder.grid(columns: 3, widthToHeightRatio: 3)
       ..addScenario(

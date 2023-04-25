@@ -16,6 +16,9 @@ class VndFocusNode extends ChangeNotifier {
   /// If true, this focus node may request the primary focus.
   bool get canRequestFocus => _flutter.canRequestFocus;
 
+  /// Returns built-in focus node.
+  FocusNode? get flutter => _flutter;
+
   /// Whether this node has input focus.
   bool get hasFocus => _state != null;
 

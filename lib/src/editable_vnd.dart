@@ -155,7 +155,7 @@ class _EditableVndState extends State<EditableVnd> {
     );
 
     built = Focus(
-      focusNode: focusNode._flutter,
+      focusNode: focusNode.flutter,
       onFocusChange: _onFlutterFocusChange,
       child: built,
     );
@@ -188,8 +188,8 @@ class _EditableVndState extends State<EditableVnd> {
     }
 
     if (widget.enabled != oldWidget.enabled) {
-      focusNode._flutter.canRequestFocus = enabled;
-      focusNode._flutter.skipTraversal = !enabled;
+      focusNode.flutter?.canRequestFocus = enabled;
+      focusNode.flutter?.skipTraversal = !enabled;
     }
   }
 
@@ -211,8 +211,8 @@ class _EditableVndState extends State<EditableVnd> {
           .addPostFrameCallback((_) => focusNode.requestFocus());
     }
 
-    focusNode._flutter.canRequestFocus = enabled;
-    focusNode._flutter.skipTraversal = !enabled;
+    focusNode.flutter?.canRequestFocus = enabled;
+    focusNode.flutter?.skipTraversal = !enabled;
   }
 
   void _disableAutoZeros(DismissDirection _) => controller.autoZeros = false;
