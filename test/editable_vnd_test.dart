@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
-import 'package:flutter_vnd_keyboard/src/vnd_editing_controller.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mockito/mockito.dart';
 
@@ -78,7 +77,7 @@ void main() async {
   });
 
   group('interactions', () {
-    bool debugDeterministicCursor;
+    var debugDeterministicCursor = true;
 
     setUp(() {
       debugDeterministicCursor = EditableText.debugDeterministicCursor;
@@ -133,11 +132,11 @@ void main() async {
         await tester.pumpWidget(materialAppWrapper()(widget));
         await tester.pumpAndSettle();
 
-        await expect(find.bySemanticsLabel('OK'), findsOneWidget);
+        expect(find.bySemanticsLabel('OK'), findsOneWidget);
         controller.done();
 
         await tester.pumpAndSettle();
-        await expect(find.bySemanticsLabel('OK'), findsNothing);
+        expect(find.bySemanticsLabel('OK'), findsNothing);
       });
 
       testWidgets('requests next focus', (tester) async {
@@ -162,12 +161,12 @@ void main() async {
         await tester.pumpWidget(materialAppWrapper()(widget));
         await tester.pumpAndSettle();
 
-        await expect(find.bySemanticsLabel('OK'), findsOneWidget);
+        expect(find.bySemanticsLabel('OK'), findsOneWidget);
         expect(textFn.hasFocus, isFalse);
         controller.done();
 
         await tester.pumpAndSettle();
-        await expect(find.bySemanticsLabel('OK'), findsNothing);
+        expect(find.bySemanticsLabel('OK'), findsNothing);
         expect(textFn.hasFocus, isTrue);
       });
 
@@ -177,6 +176,7 @@ void main() async {
         final widget = VndKeyboardProvider(
           child: FocusScope(
             child: Column(
+              key: key,
               children: [
                 TextField(
                   autofocus: true,
@@ -184,19 +184,21 @@ void main() async {
                 ),
                 EditableVnd(),
               ],
-              key: key,
             ),
           ),
         );
         await tester.pumpWidget(materialAppWrapper()(widget));
         await tester.pumpAndSettle();
 
-        await expect(find.bySemanticsLabel('OK'), findsNothing);
+        expect(find.bySemanticsLabel('OK'), findsNothing);
         expect(textFn.hasFocus, isTrue);
-        FocusScope.of(key.currentContext).nextFocus();
+
+        final keyContext = key.currentContext;
+        expect(keyContext, isNotNull);
+        FocusScope.of(keyContext!).nextFocus();
 
         await tester.pumpAndSettle();
-        await expect(find.bySemanticsLabel('OK'), findsOneWidget);
+        expect(find.bySemanticsLabel('OK'), findsOneWidget);
         expect(textFn.hasFocus, isFalse);
       });
     });
@@ -324,7 +326,9 @@ void main() async {
           symbol: symbol,
         )));
         final state1 = key.currentState;
-        final flutterFn1 = Focus.of(symbolKey.currentContext);
+        final context1 = symbolKey.currentContext;
+        final flutterFn1 = context1 != null ? Focus.of(context1) : null;
+        expect(flutterFn1, isNotNull);
 
         await tester.pumpWidget(materialAppWrapper()(EditableVnd(
           focusNode: focusNode2,
@@ -332,7 +336,8 @@ void main() async {
           symbol: symbol,
         )));
         final state2 = key.currentState;
-        final flutterFn2 = Focus.of(symbolKey.currentContext);
+        final context2 = symbolKey.currentContext;
+        final flutterFn2 = context2 != null ? Focus.of(context2) : null;
 
         expect(identical(state1, state2), isTrue);
         expect(identical(flutterFn1, flutterFn2), isFalse);

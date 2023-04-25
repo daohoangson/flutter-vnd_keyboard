@@ -4,7 +4,7 @@ import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 
 void main() async {
-  bool debugDeterministicCursor;
+  var debugDeterministicCursor = false;
 
   setUp(() {
     debugDeterministicCursor = EditableText.debugDeterministicCursor;
@@ -17,6 +17,7 @@ void main() async {
 
   testGoldens('looks correct', (tester) async {
     final widget = Column(
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         RepaintBoundary(
           child: Builder(
@@ -27,7 +28,6 @@ void main() async {
           ),
         ),
       ],
-      mainAxisAlignment: MainAxisAlignment.end,
     );
 
     await tester.pumpWidgetBuilder(
@@ -65,7 +65,7 @@ void main() async {
     var result;
 
     await tester.pumpWidget(materialAppWrapper()(Builder(
-      builder: (context) => RaisedButton(
+      builder: (context) => ElevatedButton(
         child: Text('RaisedButton'),
         onPressed: () async {
           result = await showModalBottomSheet(

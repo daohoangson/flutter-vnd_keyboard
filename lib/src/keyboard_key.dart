@@ -4,7 +4,7 @@ class KeyboardKey {
   final KeyboardKeyType type;
 
   /// The value (only applicable with type=[KeyboardKeyType.value]).
-  final String value;
+  final String? value;
 
   const KeyboardKey._(this.type, [this.value]);
 
@@ -23,7 +23,7 @@ class KeyboardKey {
   static const zeros = KeyboardKey._(KeyboardKeyType.value, '000');
 
   @override
-  String toString() => type == KeyboardKeyType.value ? value : type.toString();
+  String toString() => type == KeyboardKeyType.value ? (value ?? '') : '$type';
 }
 
 /// Keyboard key type.

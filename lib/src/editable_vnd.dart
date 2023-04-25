@@ -5,7 +5,7 @@ class EditableVnd extends StatefulWidget {
   /// The color for auto zeros.
   ///
   /// Default: [ThemeData.dividerColor].
-  final Color autoZerosColor;
+  final Color? autoZerosColor;
 
   /// Whether this text field should focus itself
   /// if nothing else is already focused.
@@ -16,12 +16,12 @@ class EditableVnd extends StatefulWidget {
   /// Controls the value being inputed.
   ///
   /// If null, this widget will create its own [VndEditingController].
-  final VndEditingController controller;
+  final VndEditingController? controller;
 
   /// A widget to display the blinking cursor.
   ///
   /// If null, this widget will create its own widget.
-  final Widget cursor;
+  final Widget? cursor;
 
   /// If false the text field is "disabled": it ignores taps.
   ///
@@ -31,20 +31,20 @@ class EditableVnd extends StatefulWidget {
   /// Defines the keyboard focus for this widget.
   ///
   /// If null, this widget will create its own [VndFocusNode].
-  final VndFocusNode focusNode;
+  final VndFocusNode? focusNode;
 
   /// Called when the user indicates that they are done.
-  final ValueChanged<int> onDone;
+  final ValueChanged<int>? onDone;
 
   /// The style to use for the text being edited.
   ///
-  /// Default: [TextTheme.subtitle1].
-  final TextStyle style;
+  /// Default: [TextTheme.titleMedium].
+  final TextStyle? style;
 
   /// A widget to display the đ symbol.
   ///
   /// If null, this widget will create its own widget.
-  final Widget symbol;
+  final Widget? symbol;
 
   /// The type of action button to use for the keyboard.
   ///
@@ -60,10 +60,10 @@ class EditableVnd extends StatefulWidget {
   /// The color for selection background.
   ///
   /// Default: [ThemeData.textSelectionColor].
-  final Color textSelectionColor;
+  final Color? textSelectionColor;
 
   /// The initial value.
-  final int vnd;
+  final int? vnd;
 
   const EditableVnd({
     this.autoZerosColor,
@@ -72,28 +72,28 @@ class EditableVnd extends StatefulWidget {
     this.cursor,
     this.enabled = true,
     this.focusNode,
-    Key key,
+    super.key,
     this.onDone,
     this.style,
     this.symbol,
     this.textInputAction = TextInputAction.done,
     this.textSelectionColor,
     this.vnd,
-  }) : super(key: key);
+  }) : super();
 
   @override
   _EditableVndState createState() => _EditableVndState();
 }
 
 class _EditableVndState extends State<EditableVnd> {
-  StreamSubscription _doneSubscription;
+  StreamSubscription? _doneSubscription;
 
-  VndEditingController _managedController;
+  VndEditingController? _managedController;
   VndEditingController get controller =>
       widget.controller ??
       (_managedController ??= VndEditingController(vnd: widget.vnd));
 
-  VndFocusNode _managedFocusNode;
+  VndFocusNode? _managedFocusNode;
   VndFocusNode get focusNode =>
       widget.focusNode ?? (_managedFocusNode ??= VndFocusNode());
 
@@ -104,64 +104,60 @@ class _EditableVndState extends State<EditableVnd> {
 
   bool get hasFocus => focusNode.hasFocus;
 
-  Color get textSelectionColor =>
-      widget.textSelectionColor ?? Theme.of(context).textSelectionColor;
+  Color? get textSelectionColor =>
+      widget.textSelectionColor ??
+      Theme.of(context).textSelectionTheme.selectionColor;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final style = widget.style ?? theme.textTheme.subtitle1;
+    final style = widget.style ?? theme.textTheme.titleMedium;
     final cursor = widget.cursor ?? _BlinkingCursor(style);
-    final symbol = widget.symbol ??
-        Text('đ',
-            style: style.copyWith(
-              color: theme.disabledColor,
-              fontSize: style.fontSize * .7,
-            ));
+    final symbol = widget.symbol ?? _Symbol(style);
 
     Widget built = AnimatedBuilder(
       animation: Listenable.merge([controller, focusNode]),
       builder: (_, __) => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           GestureDetector(
+            onTap: _onTap,
             child: Container(
-              child: Text(_formatValue(), style: style),
               color: !hasFocus
                   ? null
                   : (controller.isSelected ? textSelectionColor : null),
+              child: Text(_formatValue(), style: style),
             ),
-            onTap: _onTap,
           ),
           Opacity(
-            child: cursor,
             opacity: !hasFocus ? 0 : (controller.isSelected ? 0 : 1),
+            child: cursor,
           ),
           Visibility(
+            visible: controller.autoZeros &&
+                controller.vnd != controller.value.rawValue,
             child: Dismissible(
-              child: Text(
-                ',000',
-                style: style.copyWith(
-                  color: hasFocus ? autoZerosColor : null,
-                ),
-              ),
               direction: DismissDirection.up,
               key: ValueKey(controller),
               onDismissed: _disableAutoZeros,
+              child: Text(
+                ',000',
+                style: style?.copyWith(
+                  color: hasFocus ? autoZerosColor : null,
+                ),
+              ),
             ),
-            visible: controller.autoZeros &&
-                controller.vnd != controller.value.rawValue,
           ),
           symbol,
         ],
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
       ),
     );
 
     built = Focus(
-      child: built,
       focusNode: focusNode._flutter,
       onFocusChange: _onFlutterFocusChange,
+      child: built,
     );
 
     return built;
@@ -192,8 +188,8 @@ class _EditableVndState extends State<EditableVnd> {
     }
 
     if (widget.enabled != oldWidget.enabled) {
-      focusNode._flutter?.canRequestFocus = enabled;
-      focusNode._flutter?.skipTraversal = !enabled;
+      focusNode._flutter.canRequestFocus = enabled;
+      focusNode._flutter.skipTraversal = !enabled;
     }
   }
 
@@ -215,8 +211,8 @@ class _EditableVndState extends State<EditableVnd> {
           .addPostFrameCallback((_) => focusNode.requestFocus());
     }
 
-    focusNode._flutter?.canRequestFocus = enabled;
-    focusNode._flutter?.skipTraversal = !enabled;
+    focusNode._flutter.canRequestFocus = enabled;
+    focusNode._flutter.skipTraversal = !enabled;
   }
 
   void _disableAutoZeros(DismissDirection _) => controller.autoZeros = false;
@@ -256,9 +252,9 @@ class _EditableVndState extends State<EditableVnd> {
     if (focusNode.hasFocus == hasFlutterFocus) return;
     if (hasFlutterFocus) {
       context
-          ?.dependOnInheritedWidgetOfExactType<_InheritedWidget>()
+          .dependOnInheritedWidgetOfExactType<_InheritedWidget>()
           ?.state
-          ?.focus(focusNode, controller);
+          .focus(focusNode, controller);
     } else {
       focusNode._state?.unfocus();
     }
@@ -276,9 +272,9 @@ class _EditableVndState extends State<EditableVnd> {
 }
 
 class _BlinkingCursor extends StatefulWidget {
-  final TextStyle style;
+  final TextStyle? style;
 
-  _BlinkingCursor(this.style, {Key key}) : super(key: key);
+  _BlinkingCursor(this.style) : super();
 
   @override
   _BlinkingCursorState createState() => _BlinkingCursorState();
@@ -286,18 +282,18 @@ class _BlinkingCursor extends StatefulWidget {
 
 class _BlinkingCursorState extends State<_BlinkingCursor>
     with SingleTickerProviderStateMixin {
-  Animation<double> animation;
-  AnimationController controller;
-  double height;
+  late Animation<double> animation;
+  late AnimationController controller;
+  late double height;
 
   @override
   Widget build(BuildContext context) => Opacity(
+        opacity: animation.value,
         child: Container(
-          color: Theme.of(context).cursorColor,
+          color: Theme.of(context).textSelectionTheme.cursorColor,
           height: height,
           width: 2,
         ),
-        opacity: animation.value,
       );
 
   @override
@@ -336,5 +332,23 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
       textDirection: TextDirection.ltr,
     )..layout();
     height = tp.height;
+  }
+}
+
+class _Symbol extends StatelessWidget {
+  final TextStyle? style;
+
+  const _Symbol(this.style);
+
+  @override
+  Widget build(BuildContext context) {
+    final fontSize = style?.fontSize;
+    return Text(
+      'đ',
+      style: style?.copyWith(
+        color: Theme.of(context).disabledColor,
+        fontSize: fontSize != null ? fontSize * .7 : null,
+      ),
+    );
   }
 }

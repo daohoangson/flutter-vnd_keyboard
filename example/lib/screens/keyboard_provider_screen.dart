@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 
 class KeyboardProviderScreen extends StatefulWidget {
@@ -111,6 +110,7 @@ class _TotalListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
+        color: Theme.of(context).secondaryHeaderColor,
         child: ListTile(
           title: Row(
             children: [
@@ -125,6 +125,5 @@ class _TotalListTile extends StatelessWidget {
             ],
           ),
         ),
-        color: Theme.of(context).secondaryHeaderColor,
       );
 }

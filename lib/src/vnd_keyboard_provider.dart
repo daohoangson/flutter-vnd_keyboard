@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 
+import 'keyboard_key.dart';
+import 'vnd_editing_controller.dart';
 import 'vnd_keyboard.dart';
 
 part 'editable_vnd.dart';
@@ -10,7 +11,7 @@ part 'editable_vnd.dart';
 /// An object that can be used to obtain the [VndKeyboardProvider] focus.
 class VndFocusNode extends ChangeNotifier {
   final _flutter = FocusNode();
-  _State _state;
+  _State? _state;
 
   /// If true, this focus node may request the primary focus.
   bool get canRequestFocus => _flutter.canRequestFocus;
@@ -57,10 +58,10 @@ class VndKeyboardProvider extends StatefulWidget {
 
   /// Creates a keyboard provider.
   const VndKeyboardProvider({
-    Key key,
-    @required this.child,
+    super.key,
+    required this.child,
     this.mainAxisSize = MainAxisSize.max,
-  }) : super(key: key);
+  }) : super();
 
   @override
   State<VndKeyboardProvider> createState() => _State();
@@ -68,16 +69,15 @@ class VndKeyboardProvider extends StatefulWidget {
 
 class _InheritedWidget extends InheritedWidget {
   final _State state;
-  const _InheritedWidget(this.state, Widget child, {Key key})
-      : super(key: key, child: child);
+  const _InheritedWidget(this.state, Widget child) : super(child: child);
 
   @override
   bool updateShouldNotify(_InheritedWidget old) => state != old.state;
 }
 
 class _State extends State<VndKeyboardProvider> with WidgetsBindingObserver {
-  VndEditingController controller;
-  VndFocusNode focusNode;
+  VndEditingController? controller;
+  VndFocusNode? focusNode;
   var systemKeyboardIsVisible = false;
 
   @override
@@ -89,14 +89,14 @@ class _State extends State<VndKeyboardProvider> with WidgetsBindingObserver {
     }
 
     return Column(
+      mainAxisSize: widget.mainAxisSize,
       children: [
         child,
         Visibility(
-          child: VndKeyboard(onTap: onTap),
           visible: focusNode != null && !systemKeyboardIsVisible,
+          child: VndKeyboard(onTap: onTap),
         ),
       ],
-      mainAxisSize: widget.mainAxisSize,
     );
   }
 
@@ -146,7 +146,7 @@ class _State extends State<VndKeyboardProvider> with WidgetsBindingObserver {
         controller?.done();
         break;
       case KeyboardKeyType.value:
-        controller?.append(key.value);
+        controller?.append(key.value!);
         break;
     }
   }

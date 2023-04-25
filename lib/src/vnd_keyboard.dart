@@ -15,27 +15,27 @@ class VndKeyboard extends StatefulWidget {
   final double labelSize;
 
   /// Called when the user taps a key.
-  final ValueChanged<KeyboardKey> onTap;
+  final ValueChanged<KeyboardKey>? onTap;
 
   /// Semantic label for the Delete key.
   ///
   /// Default: ASCII 127 (delete)
-  final String semanticLabelDelete;
+  final String? semanticLabelDelete;
 
   /// Semantic label for the Done key.
   ///
   /// Default: `'OK'`.
-  final String semanticLabelDone;
+  final String? semanticLabelDone;
 
   /// Creates a VND keyboard.
   const VndKeyboard({
     this.height = 200,
-    Key key,
+    super.key,
     this.labelSize = 20,
     this.onTap,
     this.semanticLabelDelete,
     this.semanticLabelDone,
-  }) : super(key: key);
+  }) : super();
 
   @override
   _VndKeyboardState createState() => _VndKeyboardState();
@@ -44,6 +44,15 @@ class VndKeyboard extends StatefulWidget {
 class _VndKeyboardState extends State<VndKeyboard> {
   @override
   Widget build(BuildContext context) => Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: _Divider.color(context),
+              width: _Divider.kThickness,
+            ),
+          ),
+        ),
+        height: widget.height,
         child: Row(
           children: [
             _buildExpandedColumn(
@@ -114,44 +123,35 @@ class _VndKeyboardState extends State<VndKeyboard> {
             ),
           ],
         ),
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: _Divider.color(context),
-              width: _Divider.kThickness,
-            ),
-          ),
-        ),
-        height: widget.height,
       );
 
   Widget _buildExpandedColumn(
     List<Widget> children, {
     int flex = 1,
   }) =>
-      Expanded(child: Column(children: children), flex: flex);
+      Expanded(flex: flex, child: Column(children: children));
 
   Widget _buildExpandedRow(
     List<Widget> children, {
     int flex = 1,
   }) =>
-      Expanded(child: Row(children: children), flex: flex);
+      Expanded(flex: flex, child: Row(children: children));
 
   Widget _buildKey(
     KeyboardKey key, {
-    Color backgroundColor,
-    Widget child,
+    Color? backgroundColor,
+    Widget? child,
     int flex = 1,
   }) =>
       Expanded(
+        flex: flex,
         child: _Key(
           backgroundColor: backgroundColor,
-          child: child,
           labelSize: widget.labelSize,
           onTap: widget.onTap,
           value: key,
+          child: child,
         ),
-        flex: flex,
       );
 }
 
@@ -160,12 +160,11 @@ class _Divider extends StatelessWidget {
   static const kPadding = 4.0;
   static const kThickness = 1.0;
 
-  final double height;
-  final EdgeInsetsGeometry margin;
-  final double width;
+  final double? height;
+  final EdgeInsetsGeometry? margin;
+  final double? width;
 
-  const _Divider({Key key, this.height, this.margin, this.width})
-      : super(key: key);
+  const _Divider({this.height, this.margin, this.width}) : super();
 
   factory _Divider.horizontal() => _Divider(height: kThickness);
 
@@ -188,7 +187,7 @@ class _Divider extends StatelessWidget {
         width: width,
       );
 
-  _Divider copyWith({EdgeInsetsGeometry margin}) => _Divider(
+  _Divider copyWith({EdgeInsetsGeometry? margin}) => _Divider(
         height: height,
         margin:
             margin != null ? (this.margin?.add(margin) ?? margin) : this.margin,
@@ -197,24 +196,23 @@ class _Divider extends StatelessWidget {
 }
 
 extension _Invisible on Widget {
-  Widget get invisible => Opacity(child: this, opacity: 0);
+  Widget get invisible => Opacity(opacity: 0, child: this);
 }
 
 class _Key extends StatelessWidget {
-  final Color backgroundColor;
-  final Widget child;
+  final Color? backgroundColor;
+  final Widget? child;
   final double labelSize;
-  final ValueChanged<KeyboardKey> onTap;
+  final ValueChanged<KeyboardKey>? onTap;
   final KeyboardKey value;
 
   const _Key({
     this.backgroundColor,
     this.child,
-    Key key,
-    this.labelSize,
+    required this.labelSize,
     this.onTap,
-    this.value,
-  }) : super(key: key);
+    required this.value,
+  }) : super();
 
   @override
   Widget build(BuildContext context) {
@@ -225,8 +223,8 @@ class _Key extends StatelessWidget {
               value.toString(),
               style: Theme.of(context)
                   .textTheme
-                  .button
-                  .copyWith(fontSize: labelSize),
+                  .labelLarge
+                  ?.copyWith(fontSize: labelSize),
             ),
       ),
       onTap: () => onTap?.call(value),
@@ -234,11 +232,11 @@ class _Key extends StatelessWidget {
 
     if (backgroundColor != null) {
       built = DecoratedBox(
-        child: Material(
-          child: built,
-          type: MaterialType.transparency,
-        ),
         decoration: BoxDecoration(color: backgroundColor),
+        child: Material(
+          type: MaterialType.transparency,
+          child: built,
+        ),
       );
     }
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 
 class BottomSheetScreen extends StatelessWidget {
@@ -33,14 +32,14 @@ class _Button extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => RaisedButton(
+  Widget build(BuildContext context) => ElevatedButton(
         child: Text(text),
         onPressed: () async {
           final newVnd = await showModalBottomSheet(
             builder: (_) => VndBottomSheet(vnd: vnd),
             context: context,
           );
-          Scaffold.of(context).showSnackBar(SnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('vnd=$newVnd'),
             duration: const Duration(milliseconds: 100),
           ));

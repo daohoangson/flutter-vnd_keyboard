@@ -8,7 +8,7 @@ class VndEditingController extends ValueNotifier<VndEditingValue> {
   final _doneController = StreamController<VndEditingController>.broadcast();
 
   /// Creates a controller for an editable VND widget.
-  VndEditingController({int vnd})
+  VndEditingController({int? vnd})
       : super(vnd == null
             ? VndEditingValue.zero
             : VndEditingValue(autoZeros: false, rawValue: vnd));
@@ -102,9 +102,9 @@ class VndEditingValue {
 
   /// Creates a copy with the given fields replaced with the new values.
   VndEditingValue copyWith({
-    bool autoZeros,
-    bool isSelected,
-    int rawValue,
+    bool? autoZeros,
+    bool? isSelected,
+    int? rawValue,
   }) =>
       VndEditingValue(
         autoZeros: autoZeros ?? this.autoZeros,

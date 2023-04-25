@@ -6,6 +6,7 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 void main() async {
   testGoldens('looks correct', (tester) async {
     final widget = Column(
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         RepaintBoundary(
           child: Builder(
@@ -16,7 +17,6 @@ void main() async {
           ),
         ),
       ],
-      mainAxisAlignment: MainAxisAlignment.end,
     );
 
     await tester.pumpWidgetBuilder(
