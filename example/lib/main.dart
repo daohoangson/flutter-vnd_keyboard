@@ -3,17 +3,19 @@ import 'package:vnd_keyboard/screens/bottom_sheet_screen.dart';
 import 'package:vnd_keyboard/screens/keyboard_provider_screen.dart';
 import 'package:vnd_keyboard/screens/keyboard_screen.dart';
 
-void main() => runApp(DemoApp());
+void main() => runApp(const DemoApp());
 
 final _routes = Map<String, Widget Function(BuildContext)>.unmodifiable({
-  '/keyboard': (_) => KeyboardScreen(),
-  '/bottom-sheet': (_) => BottomSheetScreen(),
-  '/keyboard-provider': (_) => KeyboardProviderScreen(),
+  '/keyboard': (_) => const KeyboardScreen(),
+  '/bottom-sheet': (_) => const BottomSheetScreen(),
+  '/keyboard-provider': (_) => const KeyboardProviderScreen(),
 });
 
 final _routeNames = _routes.keys.toList(growable: false);
 
 class DemoApp extends StatelessWidget {
+  const DemoApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -29,7 +31,9 @@ class DemoApp extends StatelessWidget {
 class _Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text('VND Keyboard Demo')),
+        appBar: AppBar(
+          title: const Text('VND Keyboard Demo'),
+        ),
         body: ListView.builder(
           itemBuilder: _itemBuilder,
           itemCount: _routeNames.length,
