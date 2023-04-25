@@ -9,13 +9,15 @@ class VndEditingController extends ValueNotifier<VndEditingValue> {
 
   /// Creates a controller for an editable VND widget.
   VndEditingController({int? vnd})
-      : super(vnd == null
-            ? VndEditingValue.zero
-            : VndEditingValue(autoZeros: false, rawValue: vnd));
+      : super(
+          vnd == null
+              ? VndEditingValue.zero
+              : VndEditingValue(autoZeros: false, rawValue: vnd),
+        );
 
   /// Creates a controller for an editable VND widget
   /// from an initial [VndEditingValue].
-  VndEditingController.fromValue(VndEditingValue value) : super(value);
+  VndEditingController.fromValue(super.value) : super();
 
   /// Returns `true` if auto zeros is enabled.
   bool get autoZeros => value.autoZeros;
@@ -71,7 +73,8 @@ class VndEditingController extends ValueNotifier<VndEditingValue> {
 
   /// Adds a subscription for Done events.
   StreamSubscription<VndEditingController> onDone(
-          void Function(VndEditingController controller) listener) =>
+    void Function(VndEditingController controller) listener,
+  ) =>
       _doneController.stream.listen(listener);
 }
 

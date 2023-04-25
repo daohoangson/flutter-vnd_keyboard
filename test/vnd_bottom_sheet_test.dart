@@ -21,9 +21,9 @@ void main() async {
       children: [
         RepaintBoundary(
           child: Builder(
-            builder: (context) => Container(
+            builder: (context) => ColoredBox(
               color: Theme.of(context).canvasColor,
-              child: VndBottomSheet(),
+              child: const VndBottomSheet(),
             ),
           ),
         ),
@@ -62,21 +62,25 @@ void main() async {
 
   testWidgets('handles taps', (tester) async {
     final controller = VndEditingController();
-    var result;
+    int? result;
 
-    await tester.pumpWidget(materialAppWrapper()(Builder(
-      builder: (context) => ElevatedButton(
-        child: Text('RaisedButton'),
-        onPressed: () async {
-          result = await showModalBottomSheet(
-            builder: (_) => VndBottomSheet(controller: controller),
-            context: context,
-          );
-        },
+    await tester.pumpWidget(
+      materialAppWrapper()(
+        Builder(
+          builder: (context) => ElevatedButton(
+            child: const Text('ElevatedButton'),
+            onPressed: () async {
+              result = await showModalBottomSheet<int>(
+                builder: (_) => VndBottomSheet(controller: controller),
+                context: context,
+              );
+            },
+          ),
+        ),
       ),
-    )));
+    );
 
-    await tester.tap(find.text('RaisedButton'));
+    await tester.tap(find.text('ElevatedButton'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.bySemanticsLabel('1'));

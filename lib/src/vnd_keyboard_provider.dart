@@ -1,10 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-
-import 'keyboard_key.dart';
-import 'vnd_editing_controller.dart';
-import 'vnd_keyboard.dart';
+import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 
 part 'editable_vnd.dart';
 
@@ -81,7 +78,8 @@ class _InheritedWidget extends InheritedWidget {
 class _State extends State<VndKeyboardProvider> with WidgetsBindingObserver {
   VndEditingController? controller;
   VndFocusNode? focusNode;
-  var systemKeyboardIsVisible = false;
+
+  var _systemKeyboardIsVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +94,7 @@ class _State extends State<VndKeyboardProvider> with WidgetsBindingObserver {
       children: [
         child,
         Visibility(
-          visible: focusNode != null && !systemKeyboardIsVisible,
+          visible: focusNode != null && !_systemKeyboardIsVisible,
           child: VndKeyboard(onTap: onTap),
         ),
       ],
@@ -106,8 +104,8 @@ class _State extends State<VndKeyboardProvider> with WidgetsBindingObserver {
   @override
   void didChangeMetrics() {
     final v = WidgetsBinding.instance.window.viewInsets.bottom > 0;
-    if (v != systemKeyboardIsVisible) {
-      setState(() => systemKeyboardIsVisible = v);
+    if (v != _systemKeyboardIsVisible) {
+      setState(() => _systemKeyboardIsVisible = v);
     }
   }
 

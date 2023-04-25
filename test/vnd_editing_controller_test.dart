@@ -4,34 +4,42 @@ import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 void main() {
   group('autoZeros', () {
     test('returns true', () {
-      final controller =
-          VndEditingController.fromValue(VndEditingValue(autoZeros: true));
+      final controller = VndEditingController.fromValue(
+        // ignore: avoid_redundant_argument_values, use_named_constants
+        const VndEditingValue(autoZeros: true),
+      );
       expect(controller.autoZeros, isTrue);
     });
 
     test('returns false', () {
-      final controller =
-          VndEditingController.fromValue(VndEditingValue(autoZeros: false));
+      final controller = VndEditingController.fromValue(
+        const VndEditingValue(autoZeros: false),
+      );
       expect(controller.autoZeros, isFalse);
     });
 
     test('sets true', () {
-      final controller =
-          VndEditingController.fromValue(VndEditingValue(autoZeros: false));
+      final controller = VndEditingController.fromValue(
+        const VndEditingValue(autoZeros: false),
+      );
       controller.autoZeros = true;
       expect(controller.autoZeros, isTrue);
     });
 
     test('sets false', () {
-      final controller =
-          VndEditingController.fromValue(VndEditingValue(autoZeros: true));
+      final controller = VndEditingController.fromValue(
+        // ignore: avoid_redundant_argument_values, use_named_constants
+        const VndEditingValue(autoZeros: true),
+      );
       controller.autoZeros = false;
       expect(controller.autoZeros, isFalse);
     });
 
     test('skips changing value (already true)', () {
-      final controller =
-          VndEditingController.fromValue(VndEditingValue(autoZeros: true));
+      final controller = VndEditingController.fromValue(
+        // ignore: avoid_redundant_argument_values, use_named_constants
+        const VndEditingValue(autoZeros: true),
+      );
       var triggered = 0;
       controller.addListener(() => triggered++);
       controller.autoZeros = true;
@@ -39,8 +47,9 @@ void main() {
     });
 
     test('skips changing value (already false)', () {
-      final controller =
-          VndEditingController.fromValue(VndEditingValue(autoZeros: false));
+      final controller = VndEditingController.fromValue(
+        const VndEditingValue(autoZeros: false),
+      );
       var triggered = 0;
       controller.addListener(() => triggered++);
       controller.autoZeros = false;
@@ -50,34 +59,41 @@ void main() {
 
   group('isSelected', () {
     test('returns true', () {
-      final controller =
-          VndEditingController.fromValue(VndEditingValue(isSelected: true));
+      final controller = VndEditingController.fromValue(
+        const VndEditingValue(isSelected: true),
+      );
       expect(controller.isSelected, isTrue);
     });
 
     test('returns false', () {
-      final controller =
-          VndEditingController.fromValue(VndEditingValue(isSelected: false));
+      final controller = VndEditingController.fromValue(
+        // ignore: avoid_redundant_argument_values, use_named_constants
+        const VndEditingValue(isSelected: false),
+      );
       expect(controller.isSelected, isFalse);
     });
 
     test('sets true', () {
-      final controller =
-          VndEditingController.fromValue(VndEditingValue(isSelected: false));
+      final controller = VndEditingController.fromValue(
+        // ignore: avoid_redundant_argument_values, use_named_constants
+        const VndEditingValue(isSelected: false),
+      );
       controller.isSelected = true;
       expect(controller.isSelected, isTrue);
     });
 
     test('sets false', () {
-      final controller =
-          VndEditingController.fromValue(VndEditingValue(isSelected: true));
+      final controller = VndEditingController.fromValue(
+        const VndEditingValue(isSelected: true),
+      );
       controller.isSelected = false;
       expect(controller.isSelected, isFalse);
     });
 
     test('skips changing value (already true)', () {
-      final controller =
-          VndEditingController.fromValue(VndEditingValue(isSelected: true));
+      final controller = VndEditingController.fromValue(
+        const VndEditingValue(isSelected: true),
+      );
       var triggered = 0;
       controller.addListener(() => triggered++);
       controller.isSelected = true;
@@ -85,8 +101,10 @@ void main() {
     });
 
     test('skips changing value (already false)', () {
-      final controller =
-          VndEditingController.fromValue(VndEditingValue(isSelected: false));
+      final controller = VndEditingController.fromValue(
+        // ignore: avoid_redundant_argument_values, use_named_constants
+        const VndEditingValue(isSelected: false),
+      );
       var triggered = 0;
       controller.addListener(() => triggered++);
       controller.isSelected = false;
@@ -150,22 +168,24 @@ void main() {
   group('vnd', () {
     group('autoZeros=false', () {
       test('rawValue=1', () {
-        final value = VndEditingValue(autoZeros: false, rawValue: 1);
+        const value = VndEditingValue(autoZeros: false, rawValue: 1);
         expect(value.vnd, equals(1));
       });
       test('rawValue=1000', () {
-        final value = VndEditingValue(autoZeros: false, rawValue: 1000);
+        const value = VndEditingValue(autoZeros: false, rawValue: 1000);
         expect(value.vnd, equals(1000));
       });
     });
 
     group('autoZeros=true', () {
       test('rawValue=1', () {
-        final value = VndEditingValue(autoZeros: true, rawValue: 1);
+        // ignore: avoid_redundant_argument_values
+        const value = VndEditingValue(autoZeros: true, rawValue: 1);
         expect(value.vnd, equals(1000));
       });
       test('rawValue=1000', () {
-        final value = VndEditingValue(autoZeros: true, rawValue: 1000);
+        // ignore: avoid_redundant_argument_values
+        const value = VndEditingValue(autoZeros: true, rawValue: 1000);
         expect(value.vnd, equals(1000));
       });
     });

@@ -25,7 +25,7 @@ import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 And use `VndKeyboard` or `VndBottomSheet` where appropriate.
 
 ```dart
-      RaisedButton(
+      ElevatedButton(
         child: Text('showBottomSheet'),
         onPressed: () async {
           final vnd = await showModalBottomSheet(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'keyboard_key.dart';
+import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 
 /// A Vietnamese đồng keyboard.
 class VndKeyboard extends StatefulWidget {
@@ -38,7 +37,7 @@ class VndKeyboard extends StatefulWidget {
   }) : super();
 
   @override
-  _VndKeyboardState createState() => _VndKeyboardState();
+  State<VndKeyboard> createState() => _VndKeyboardState();
 }
 
 class _VndKeyboardState extends State<VndKeyboard> {
@@ -48,6 +47,7 @@ class _VndKeyboardState extends State<VndKeyboard> {
           border: Border(
             top: BorderSide(
               color: _Divider.color(context),
+              // ignore: avoid_redundant_argument_values
               width: _Divider.kThickness,
             ),
           ),
@@ -166,9 +166,9 @@ class _Divider extends StatelessWidget {
 
   const _Divider({this.height, this.margin, this.width}) : super();
 
-  factory _Divider.horizontal() => _Divider(height: kThickness);
+  factory _Divider.horizontal() => const _Divider(height: kThickness);
 
-  factory _Divider.vertical() => _Divider(width: kThickness);
+  factory _Divider.vertical() => const _Divider(width: kThickness);
 
   _Divider get marginBottom =>
       copyWith(margin: const EdgeInsets.only(bottom: _Divider.kPadding));

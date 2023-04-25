@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'vnd_editing_controller.dart';
-import 'vnd_keyboard_provider.dart';
+import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
 
 /// A Vietnamese đồng bottom sheet.
 class VndBottomSheet extends StatelessWidget {

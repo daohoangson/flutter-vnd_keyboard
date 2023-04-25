@@ -10,9 +10,9 @@ void main() async {
       children: [
         RepaintBoundary(
           child: Builder(
-            builder: (context) => Container(
+            builder: (context) => ColoredBox(
               color: Theme.of(context).canvasColor,
-              child: VndKeyboard(),
+              child: const VndKeyboard(),
             ),
           ),
         ),

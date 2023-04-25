@@ -82,7 +82,7 @@ class EditableVnd extends StatefulWidget {
   }) : super();
 
   @override
-  _EditableVndState createState() => _EditableVndState();
+  State<EditableVnd> createState() => _EditableVndState();
 }
 
 class _EditableVndState extends State<EditableVnd> {
@@ -115,7 +115,7 @@ class _EditableVndState extends State<EditableVnd> {
     final cursor = widget.cursor ?? _BlinkingCursor(style);
     final symbol = widget.symbol ?? _Symbol(style);
 
-    Widget built = AnimatedBuilder(
+    final built = AnimatedBuilder(
       animation: Listenable.merge([controller, focusNode]),
       builder: (_, __) => Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,13 +154,11 @@ class _EditableVndState extends State<EditableVnd> {
       ),
     );
 
-    built = Focus(
+    return Focus(
       focusNode: focusNode.flutter,
       onFocusChange: _onFlutterFocusChange,
       child: built,
     );
-
-    return built;
   }
 
   @override
@@ -274,7 +272,7 @@ class _EditableVndState extends State<EditableVnd> {
 class _BlinkingCursor extends StatefulWidget {
   final TextStyle? style;
 
-  _BlinkingCursor(this.style) : super();
+  const _BlinkingCursor(this.style) : super();
 
   @override
   _BlinkingCursorState createState() => _BlinkingCursorState();
