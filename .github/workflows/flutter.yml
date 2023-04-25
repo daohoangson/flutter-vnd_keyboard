@@ -32,11 +32,6 @@ jobs:
         with:
           cache: true
           channel: ${{ matrix.channel }}
-      - name: Run flutter test
-        run: |
-          if [ "${{ matrix.channel }}" == "stable" ]; then
-            flutter test --coverage
-            bash <(curl -s https://codecov.io/bash)
-          else
-            flutter test
-          fi
+      - run: flutter test --coverage
+      - uses: codecov/codecov-action@v3
+        if: matrix.channel == 'stable'
