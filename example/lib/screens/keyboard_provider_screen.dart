@@ -25,9 +25,19 @@ class _KeyboardProviderState extends State<KeyboardProviderScreen> {
             child: ListView(
               children: [
                 const _TextListTile('Title'),
-                _VndListTile('Price', price, priceFn),
+                _VndListTile(
+                  controller: price,
+                  focusNode: priceFn,
+                  textInputAction: TextInputAction.next,
+                  title: 'Price',
+                ),
                 const _TextListTile('Note'),
-                _VndListTile('Shipping', shipping, shippingFn),
+                _VndListTile(
+                  controller: shipping,
+                  focusNode: shippingFn,
+                  textInputAction: TextInputAction.done,
+                  title: 'Shipping',
+                ),
                 _TotalListTile(price: price, shipping: shipping),
               ],
             ),
@@ -50,9 +60,15 @@ class _KeyboardProviderState extends State<KeyboardProviderScreen> {
 class _VndListTile extends StatefulWidget {
   final VndEditingController controller;
   final VndFocusNode focusNode;
+  final TextInputAction textInputAction;
   final String title;
 
-  const _VndListTile(this.title, this.controller, this.focusNode) : super();
+  const _VndListTile({
+    required this.controller,
+    required this.focusNode,
+    required this.textInputAction,
+    required this.title,
+  }) : super();
 
   @override
   State<_VndListTile> createState() => _VndListTileState();
@@ -71,7 +87,7 @@ class _VndListTileState extends State<_VndListTile> {
             EditableVnd(
               controller: widget.controller,
               focusNode: widget.focusNode,
-              textInputAction: TextInputAction.next,
+              textInputAction: widget.textInputAction,
             ),
           ],
         ),

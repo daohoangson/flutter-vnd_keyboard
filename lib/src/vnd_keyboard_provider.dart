@@ -8,7 +8,7 @@ part 'editable_vnd.dart';
 /// An object that can be used to obtain the [VndKeyboardProvider] focus.
 class VndFocusNode extends ChangeNotifier {
   final _flutter = FocusNode();
-  _State? _state;
+  var _hasFocus = false;
 
   /// If true, this focus node may request the primary focus.
   bool get canRequestFocus => _flutter.canRequestFocus;
@@ -17,7 +17,7 @@ class VndFocusNode extends ChangeNotifier {
   FocusNode? get flutter => _flutter;
 
   /// Whether this node has input focus.
-  bool get hasFocus => _state != null;
+  bool get hasFocus => _hasFocus;
 
   /// If true, tells the focus traversal policy to skip over this node for
   /// purposes of the traversal algorithm.
@@ -35,13 +35,13 @@ class VndFocusNode extends ChangeNotifier {
   /// Removes the focus on this node.
   void unfocus() => _flutter.unfocus();
 
-  void _onFocused(_State state) {
-    _state = state;
+  void _onFocusNodeFocused() {
+    _hasFocus = true;
     notifyListeners();
   }
 
-  void _onUnfocused() {
-    _state = null;
+  void _onFocusNodeUnfocused() {
+    _hasFocus = false;
     notifyListeners();
   }
 }
@@ -76,9 +76,8 @@ class _InheritedWidget extends InheritedWidget {
 }
 
 class _State extends State<VndKeyboardProvider> with WidgetsBindingObserver {
-  VndEditingController? controller;
-  VndFocusNode? focusNode;
-
+  VndEditingController? _controller;
+  var _hasFocus = false;
   var _systemKeyboardIsVisible = false;
 
   @override
@@ -94,8 +93,8 @@ class _State extends State<VndKeyboardProvider> with WidgetsBindingObserver {
       children: [
         child,
         Visibility(
-          visible: focusNode != null && !_systemKeyboardIsVisible,
-          child: VndKeyboard(onTap: onTap),
+          visible: _hasFocus && !_systemKeyboardIsVisible,
+          child: VndKeyboard(onTap: _controller?.onTap),
         ),
       ],
     );
@@ -115,34 +114,13 @@ class _State extends State<VndKeyboardProvider> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  void focus(VndFocusNode focusNode, VndEditingController controller) {
-    this.focusNode?._onUnfocused();
-
+  void _setController(VndEditingController? controller) {
+    final hasFocus = controller != null;
     setState(() {
-      this.controller = controller;
-      this.focusNode = focusNode;
+      _controller = controller;
+      _hasFocus = hasFocus;
     });
 
-    focusNode._onFocused(this);
-    _onFocusChange(true);
-  }
-
-  void unfocus() {
-    focusNode?._onUnfocused();
-
-    setState(() {
-      controller = null;
-      focusNode = null;
-    });
-
-    _onFocusChange(false);
-  }
-
-  void onTap(KeyboardKey key) {
-    return controller?.onTap(key);
-  }
-
-  void _onFocusChange(bool hasFocus) {
     if (hasFocus) {
       WidgetsBinding.instance.addObserver(this);
       didChangeMetrics();

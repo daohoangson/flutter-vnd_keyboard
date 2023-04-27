@@ -248,13 +248,15 @@ class _EditableVndState extends State<EditableVnd> {
 
   void _onFlutterFocusChange(bool hasFlutterFocus) {
     if (focusNode.hasFocus == hasFlutterFocus) return;
+
+    final provider =
+        context.dependOnInheritedWidgetOfExactType<_InheritedWidget>()?.state;
     if (hasFlutterFocus) {
-      context
-          .dependOnInheritedWidgetOfExactType<_InheritedWidget>()
-          ?.state
-          .focus(focusNode, controller);
+      focusNode._onFocusNodeFocused();
+      provider?._setController(controller);
     } else {
-      focusNode._state?.unfocus();
+      focusNode._onFocusNodeUnfocused();
+      provider?._setController(null);
     }
   }
 
