@@ -117,42 +117,49 @@ class _EditableVndState extends State<EditableVnd> {
 
     final built = AnimatedBuilder(
       animation: Listenable.merge([controller, focusNode]),
-      builder: (_, __) => Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          GestureDetector(
-            onTap: _onTap,
-            child: Container(
-              color: !hasFocus
-                  ? null
-                  : (controller.isSelected ? textSelectionColor : null),
-              child: Text(_formatValue(), style: style),
+      builder: (_, __) {
+        final textSelectionColor = !hasFocus
+            ? null
+            : (controller.isSelected ? this.textSelectionColor : null);
+        final textValue = Text(_formatValue(), style: style);
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              onTap: _onTap,
+              child: textSelectionColor != null
+                  ? ColoredBox(
+                      color: textSelectionColor,
+                      child: textValue,
+                    )
+                  : textValue,
             ),
-          ),
-          if (showCursor)
-            _BlinkingCursor(
-              isVisible: hasFocus && !controller.isSelected,
-              style: style,
-            ),
-          Visibility(
-            visible: controller.autoZeros &&
-                controller.vnd != controller.value.rawValue,
-            child: Dismissible(
-              direction: DismissDirection.up,
-              key: ValueKey(controller),
-              onDismissed: _disableAutoZeros,
-              child: Text(
-                ',000',
-                style: style?.copyWith(
-                  color: hasFocus ? autoZerosColor : null,
+            if (showCursor)
+              _BlinkingCursor(
+                isVisible: hasFocus && !controller.isSelected,
+                style: style,
+              ),
+            Visibility(
+              visible: controller.autoZeros &&
+                  controller.vnd != controller.value.rawValue,
+              child: Dismissible(
+                direction: DismissDirection.up,
+                key: ValueKey(controller),
+                onDismissed: _disableAutoZeros,
+                child: Text(
+                  ',000',
+                  style: style?.copyWith(
+                    color: hasFocus ? autoZerosColor : null,
+                  ),
                 ),
               ),
             ),
-          ),
-          symbol,
-        ],
-      ),
+            symbol,
+          ],
+        );
+      },
     );
 
     return Focus(
