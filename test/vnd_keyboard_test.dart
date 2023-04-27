@@ -89,4 +89,29 @@ void main() async {
     await tester.tap(find.bySemanticsLabel('OK'));
     expect(keys.last, equals(KeyboardKey.done));
   });
+
+  group('keys', () {
+    testWidgets('render default', (tester) async {
+      await tester.pumpWidget(materialAppWrapper()(const VndKeyboard()));
+
+      expect(find.byIcon(Icons.backspace), findsOneWidget);
+      expect(find.byIcon(Icons.done), findsOneWidget);
+    });
+
+    testWidgets('render custom', (tester) async {
+      await tester.pumpWidget(
+        materialAppWrapper()(
+          const VndKeyboard(
+            keyDelete: Text('keyDelete'),
+            keyDone: Text('keyDone'),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.backspace), findsNothing);
+      expect(find.text('keyDelete'), findsOneWidget);
+      expect(find.byIcon(Icons.done), findsNothing);
+      expect(find.text('keyDone'), findsOneWidget);
+    });
+  });
 }

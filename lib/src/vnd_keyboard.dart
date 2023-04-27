@@ -8,6 +8,12 @@ class VndKeyboard extends StatefulWidget {
   /// Default: `200`.
   final double height;
 
+  /// The Delete key.
+  final Widget? keyDelete;
+
+  /// The Done key.
+  final Widget? keyDone;
+
   /// The font size of key labels.
   ///
   /// Default: `20`.
@@ -16,24 +22,14 @@ class VndKeyboard extends StatefulWidget {
   /// Called when the user taps a key.
   final ValueChanged<KeyboardKey>? onTap;
 
-  /// Semantic label for the Delete key.
-  ///
-  /// Default: ASCII 127 (delete)
-  final String? semanticLabelDelete;
-
-  /// Semantic label for the Done key.
-  ///
-  /// Default: `'OK'`.
-  final String? semanticLabelDone;
-
   /// Creates a VND keyboard.
   const VndKeyboard({
     this.height = 200,
     super.key,
+    this.keyDelete,
+    this.keyDone,
     this.labelSize = 20,
     this.onTap,
-    this.semanticLabelDelete,
-    this.semanticLabelDone,
   }) : super();
 
   @override
@@ -103,21 +99,22 @@ class _VndKeyboardState extends State<VndKeyboard> {
               [
                 _buildKey(
                   KeyboardKey.delete,
-                  child: Icon(
-                    Icons.backspace,
-                    // https://www.fileformat.info/info/unicode/char/007f/index.htm
-                    semanticLabel:
-                        widget.semanticLabelDelete ?? String.fromCharCode(127),
-                  ),
+                  child: widget.keyDelete ??
+                      Icon(
+                        Icons.backspace,
+                        // https://www.fileformat.info/info/unicode/char/007f/index.htm
+                        semanticLabel: String.fromCharCode(127),
+                      ),
                 ),
                 _buildKey(
                   KeyboardKey.done,
                   backgroundColor: Theme.of(context).primaryColor,
-                  child: Icon(
-                    Icons.done,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    semanticLabel: widget.semanticLabelDone ?? 'OK',
-                  ),
+                  child: widget.keyDone ??
+                      Icon(
+                        Icons.done,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        semanticLabel: 'OK',
+                      ),
                 ),
               ],
             ),
