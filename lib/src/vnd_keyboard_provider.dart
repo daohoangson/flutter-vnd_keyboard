@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_vnd_keyboard/flutter_vnd_keyboard.dart';
+import 'package:flutter_vnd_keyboard/src/vnd_row.dart';
 
 part 'editable_vnd.dart';
 

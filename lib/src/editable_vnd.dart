@@ -86,7 +86,7 @@ class EditableVnd extends StatefulWidget {
 }
 
 class _EditableVndState extends State<EditableVnd> {
-  StreamSubscription? _doneSubscription;
+  late StreamSubscription _doneSubscription;
 
   VndEditingController? _managedController;
   VndEditingController get controller =>
@@ -121,11 +121,9 @@ class _EditableVndState extends State<EditableVnd> {
         final textSelectionColor = !hasFocus
             ? null
             : (controller.isSelected ? this.textSelectionColor : null);
-        final textValue = Text(_formatValue(), style: style);
+        final textValue = Text(_formatValue(), maxLines: 1, style: style);
 
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+        return VndRow(
           children: [
             GestureDetector(
               onTap: _onTap,
@@ -174,7 +172,7 @@ class _EditableVndState extends State<EditableVnd> {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller ||
         widget.vnd != oldWidget.vnd) {
-      _doneSubscription?.cancel();
+      _doneSubscription.cancel();
 
       final outdatedController = _managedController;
       if (outdatedController != null) {
@@ -201,7 +199,7 @@ class _EditableVndState extends State<EditableVnd> {
 
   @override
   void dispose() {
-    _doneSubscription?.cancel();
+    _doneSubscription.cancel();
     _managedController?.dispose();
     _managedFocusNode?.dispose();
     super.dispose();
@@ -291,22 +289,20 @@ class _BlinkingCursor extends StatefulWidget {
 
 class _BlinkingCursorState extends State<_BlinkingCursor>
     with SingleTickerProviderStateMixin {
-  late final AnimationController controller;
-  late double height;
+  late final AnimationController _controller;
 
   @override
   Widget build(BuildContext context) {
     final color = DefaultSelectionStyle.of(context).cursorColor;
     return AnimatedBuilder(
-      animation: controller,
+      animation: _controller,
       builder: (context, child) {
         return Opacity(
-          opacity: controller.value,
+          opacity: _controller.value,
           child: child,
         );
       },
       child: SizedBox(
-        height: height,
         width: 2,
         child: color != null ? ColoredBox(color: color) : null,
       ),
@@ -316,13 +312,12 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
   @override
   void didUpdateWidget(covariant _BlinkingCursor oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _calculateHeight();
     _repeatOrStop();
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -330,34 +325,25 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
   void initState() {
     super.initState();
 
-    controller = AnimationController(
+    _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
 
-    _calculateHeight();
     _repeatOrStop();
-  }
-
-  void _calculateHeight() {
-    final tp = TextPainter(
-      text: TextSpan(text: '123456', style: widget.style),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    height = tp.height;
   }
 
   void _repeatOrStop() {
     if (!widget.isVisible) {
-      controller
+      _controller
         ..stop()
         ..value = .0;
     } else if (EditableText.debugDeterministicCursor) {
-      controller
+      _controller
         ..stop()
         ..value = 1;
     } else {
-      controller.repeat(reverse: true);
+      _controller.repeat(reverse: true);
     }
   }
 }

@@ -9,7 +9,16 @@ void main() async {
     final focusedNode = _MockFocusNode();
     when(() => focusedNode.hasFocus).thenReturn(true);
 
-    final builder = GoldenBuilder.grid(columns: 3, widthToHeightRatio: 3)
+    const surfaceWidth = 810.0;
+    const columns = 3;
+    const widthToHeightRatio = 2.5;
+    const rows = 3;
+    const surfaceHeight = surfaceWidth / columns / widthToHeightRatio * rows;
+
+    final builder = GoldenBuilder.grid(
+      columns: columns,
+      widthToHeightRatio: widthToHeightRatio,
+    )
       ..addScenario(
         '0đ',
         const EditableVnd(),
@@ -72,11 +81,25 @@ void main() async {
             ),
           ),
         ),
+      )
+      ..addScenario(
+        'Overflow',
+        ClipRect(
+          child: EditableVnd(
+            controller: VndEditingController.fromValue(
+              const VndEditingValue(
+                rawValue: 9223372036854775807,
+                isSelected: true,
+              ),
+            ),
+            style: const TextStyle(fontSize: 30),
+          ),
+        ),
       );
 
     await tester.pumpWidgetBuilder(
       builder.build(),
-      surfaceSize: const Size(810, 270),
+      surfaceSize: const Size(surfaceWidth, surfaceHeight),
     );
     await screenMatchesGolden(
       tester,
