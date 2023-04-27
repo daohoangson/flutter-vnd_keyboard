@@ -134,6 +134,20 @@ void main() {
       controller.delete();
       expect(triggered, equals(0));
     });
+
+    test('skips appending on max int', () {
+      final controller = VndEditingController(vnd: 9223372036854775807);
+      controller.append('0');
+      expect(controller.vnd, equals(9223372036854775807));
+    });
+
+    test('skips replacing on int overflow', () {
+      final controller = VndEditingController(vnd: 123);
+      controller.isSelected = true;
+      controller.append('9223372036854775808');
+      expect(controller.isSelected, isFalse);
+      expect(controller.vnd, equals(0));
+    });
   });
 
   group('delete', () {

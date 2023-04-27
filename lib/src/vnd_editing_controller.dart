@@ -45,7 +45,7 @@ class VndEditingController extends ValueNotifier<VndEditingValue> {
       return;
     }
 
-    final rawValue = int.tryParse('${value.rawValue}$str') ?? 0;
+    final rawValue = int.tryParse('${value.rawValue}$str') ?? vnd;
     value = value.copyWith(rawValue: rawValue);
   }
 
