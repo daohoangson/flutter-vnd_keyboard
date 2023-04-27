@@ -18,11 +18,6 @@ class EditableVnd extends StatefulWidget {
   /// If null, this widget will create its own [VndEditingController].
   final VndEditingController? controller;
 
-  /// A widget to display the blinking cursor.
-  ///
-  /// If null, this widget will create its own widget.
-  final Widget? cursor;
-
   /// If false the text field is "disabled": it ignores taps.
   ///
   /// Default: `true`.
@@ -35,6 +30,11 @@ class EditableVnd extends StatefulWidget {
 
   /// Called when the user indicates that they are done.
   final ValueChanged<int>? onDone;
+
+  /// If false the cursor will be hidden.
+  ///
+  /// Default: [enabled].
+  final bool? showCursor;
 
   /// The style to use for the text being edited.
   ///
@@ -69,11 +69,11 @@ class EditableVnd extends StatefulWidget {
     this.autoZerosColor,
     this.autofocus = false,
     this.controller,
-    this.cursor,
     this.enabled = true,
     this.focusNode,
     super.key,
     this.onDone,
+    this.showCursor,
     this.style,
     this.symbol,
     this.textInputAction = TextInputAction.done,
@@ -110,9 +110,9 @@ class _EditableVndState extends State<EditableVnd> {
 
   @override
   Widget build(BuildContext context) {
+    final showCursor = widget.showCursor ?? enabled;
     final theme = Theme.of(context);
     final style = widget.style ?? theme.textTheme.titleMedium;
-    final cursor = widget.cursor ?? _BlinkingCursor(style);
     final symbol = widget.symbol ?? _Symbol(style);
 
     final built = AnimatedBuilder(
@@ -130,10 +130,11 @@ class _EditableVndState extends State<EditableVnd> {
               child: Text(_formatValue(), style: style),
             ),
           ),
-          Opacity(
-            opacity: !hasFocus ? 0 : (controller.isSelected ? 0 : 1),
-            child: cursor,
-          ),
+          if (showCursor)
+            _BlinkingCursor(
+              isVisible: hasFocus && !controller.isSelected,
+              style: style,
+            ),
           Visibility(
             visible: controller.autoZeros &&
                 controller.vnd != controller.value.rawValue,
@@ -272,9 +273,10 @@ class _EditableVndState extends State<EditableVnd> {
 }
 
 class _BlinkingCursor extends StatefulWidget {
+  final bool isVisible;
   final TextStyle? style;
 
-  const _BlinkingCursor(this.style) : super();
+  const _BlinkingCursor({required this.isVisible, this.style}) : super();
 
   @override
   _BlinkingCursorState createState() => _BlinkingCursorState();
@@ -282,24 +284,33 @@ class _BlinkingCursor extends StatefulWidget {
 
 class _BlinkingCursorState extends State<_BlinkingCursor>
     with SingleTickerProviderStateMixin {
-  late Animation<double> animation;
-  late AnimationController controller;
+  late final AnimationController controller;
   late double height;
 
   @override
-  Widget build(BuildContext context) => Opacity(
-        opacity: animation.value,
-        child: Container(
-          color: DefaultSelectionStyle.of(context).cursorColor,
-          height: height,
-          width: 2,
-        ),
-      );
+  Widget build(BuildContext context) {
+    final color = DefaultSelectionStyle.of(context).cursorColor;
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) {
+        return Opacity(
+          opacity: controller.value,
+          child: child,
+        );
+      },
+      child: SizedBox(
+        height: height,
+        width: 2,
+        child: color != null ? ColoredBox(color: color) : null,
+      ),
+    );
+  }
 
   @override
   void didUpdateWidget(covariant _BlinkingCursor oldWidget) {
     super.didUpdateWidget(oldWidget);
     _calculateHeight();
+    _repeatOrStop();
   }
 
   @override
@@ -316,14 +327,9 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
-    animation = Tween<double>(begin: 1, end: 0).animate(controller)
-      ..addListener(() => setState(() {}));
-
-    if (!EditableText.debugDeterministicCursor) {
-      controller.repeat(reverse: true);
-    }
 
     _calculateHeight();
+    _repeatOrStop();
   }
 
   void _calculateHeight() {
@@ -332,6 +338,20 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
       textDirection: TextDirection.ltr,
     )..layout();
     height = tp.height;
+  }
+
+  void _repeatOrStop() {
+    if (!widget.isVisible) {
+      controller
+        ..stop()
+        ..value = .0;
+    } else if (EditableText.debugDeterministicCursor) {
+      controller
+        ..stop()
+        ..value = 1;
+    } else {
+      controller.repeat(reverse: true);
+    }
   }
 }
 
