@@ -12,8 +12,6 @@ void main() async {
     const surfaceWidth = 810.0;
     const columns = 3;
     const widthToHeightRatio = 2.5;
-    const rows = 3;
-    const surfaceHeight = surfaceWidth / columns / widthToHeightRatio * rows;
 
     final builder = GoldenBuilder.grid(
       columns: columns,
@@ -97,9 +95,15 @@ void main() async {
         ),
       );
 
+    final rows = (builder.scenarios.length / columns).ceil();
+    // https://github.com/eBay/flutter_glove_box/blob/5af8ed5285d9fa261e5db054cbeab22814a93e32/packages/golden_toolkit/lib/src/golden_builder.dart#L135
+    final mainAxisSpacing = 16 * (rows - 1);
+    final surfaceHeight =
+        (surfaceWidth / columns / widthToHeightRatio * rows) + mainAxisSpacing;
+
     await tester.pumpWidgetBuilder(
       builder.build(),
-      surfaceSize: const Size(surfaceWidth, surfaceHeight),
+      surfaceSize: Size(surfaceWidth, surfaceHeight),
     );
     await screenMatchesGolden(
       tester,

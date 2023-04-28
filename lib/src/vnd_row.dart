@@ -25,9 +25,16 @@ class _VndRowRenderObject extends RenderBox
       super.computeMaxIntrinsicHeight(width);
 
   @override
-  double computeMaxIntrinsicWidth(double height) =>
-      firstChild?.getMaxIntrinsicWidth(height) ??
-      super.computeMaxIntrinsicWidth(height);
+  double computeMaxIntrinsicWidth(double height) {
+    RenderBox? child = firstChild;
+    var width = .0;
+    while (child != null) {
+      final childParentData = child.parentData! as _VndRowParentData;
+      width += child.getMaxIntrinsicWidth(height);
+      child = childParentData.nextSibling;
+    }
+    return width;
+  }
 
   @override
   double computeMinIntrinsicHeight(double width) =>
